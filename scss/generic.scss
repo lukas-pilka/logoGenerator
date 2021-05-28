@@ -1,0 +1,27 @@
+
+main{
+    max-width: 72ch;
+    margin: 0 auto;
+}
+form {
+    display: flex;
+    flex-direction: column;
+    > * + * {
+        margin-top: 1em;
+    }
+}
+
+.radio-input-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    > *:first-child {
+        grid-column-start: 1;
+        grid-column-end: 3;
+        background: black;
+        color: white;
+    }
+}
+
+
+
+
