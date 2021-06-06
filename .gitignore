@@ -4,5 +4,4 @@ __pycache__
 venv/*
 pyvenv.cfg
 cloud_sql_proxy
-app.yaml
 /venv/
