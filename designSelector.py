@@ -48,7 +48,7 @@ def getLogos(cnx,logosCount=3):
         primaryColorId, primaryColor = getPrimaryColor(cnx)
         logoAttributes = [{"Primary color": [primaryColorId, primaryColor]},
                           {"Font family": [fontFamilyId, fontFamily]},
-                          {"Font weight": [fontWeightId, fontWeight]}]
+                          {"Font weight": [fontWeightId, fontWeight]}] # You can add attributes here
         logos.append(logoAttributes)
         ipAddress = request.remote_addr
         requestTime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")

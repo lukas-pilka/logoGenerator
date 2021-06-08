@@ -1,9 +1,10 @@
 .DS_Store
 __pycache__
-.venv
 .flaskenv
 venv/*
 /venv/
+.venv
 pyvenv.cfg
 cloud_sql_proxy
 app.yaml
+.idea
