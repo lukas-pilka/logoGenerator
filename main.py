@@ -1,11 +1,10 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect, CSRFError
 from forms import *
 import pymysql
 import os
 import designSelector
-from datetime import datetime
 
 
 app = Flask(__name__)
@@ -33,15 +32,6 @@ def cloudSqlCnx():
         cnx = pymysql.connect(user=db_user, password=db_password, host=host, db=db_name)
         return cnx
 
-def writeLogoView(cnx,fontFamilyId,fontWeightId,ipAddress,requestTime):
-    # Write logo view into logo_views table
-    with cnx.cursor() as cursor:
-        # Create a new record
-        sql = "INSERT INTO `logo_views` (`font_family_id`, `font_weight_id`, `user_ip`,`created`) VALUES (%s, %s, %s, %s)"
-        cursor.execute(sql, (fontFamilyId, fontWeightId, ipAddress, requestTime))
-    # connection is not autocommit by default. So you must commit to save your changes.
-    cnx.commit()
-
 @app.route("/", methods=["GET"])
 def index():
     context = dict(logo_generator_form=LogoGeneratorForm(),)
@@ -49,15 +39,10 @@ def index():
 
 @app.route("/get_logo_results", methods=["GET"])
 def get_logo_results():
-    cnx = cloudSqlCnx()
-    ipAddress = request.remote_addr
-    requestTime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    fontFamilyId, fontFamily = designSelector.getFontFamily(cnx)
-    fontWeightId, fontWeight = designSelector.getFontWeight(cnx)
-    writeLogoView(cnx, fontFamilyId, fontWeightId, ipAddress, requestTime)
-    cnx.close()
-
-    return fontFamily +', ' + str(fontWeight)
+    cnx = cloudSqlCnx() # Open connection
+    logos = designSelector.getLogos(cnx,5) # connection, count of logos
+    cnx.close() # Close connection
+    return str(logos)
     '''
     logo_generator_form = LogoGeneratorForm()
     if logo_generator_form.validate_on_submit():
