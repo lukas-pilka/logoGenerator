@@ -1,6 +1,5 @@
 import random
-from datetime import datetime
-from flask import request
+from flask import request, url_for
 
 
 def getFontFamily(cnx):
@@ -29,28 +28,22 @@ def getPrimaryColor(cnx):
         rndPrimaryColor = allPrimaryColors[random.randint(0, len(allPrimaryColors) - 1)][1]
     return rndPrimaryColorId, rndPrimaryColor
 
-
-def writeLogoView(cnx,fontFamilyId,fontWeightId,primaryColorId,ipAddress,requestTime):
-    # Write logo view into logo_views table
-    with cnx.cursor() as cursor:
-        # Create a new record
-        sql = "INSERT INTO `logo_views` (`font_family_id`, `font_weight_id`, `primary_color_id`, `user_ip`,`created`) VALUES (%s, %s, %s, %s, %s)"
-        cursor.execute(sql, (fontFamilyId, fontWeightId, primaryColorId, ipAddress, requestTime))
-    # connection is not autocommit by default. So you must commit to save your changes.
-    cnx.commit()
-
-
 def getLogos(cnx,logosCount=3):
     logos = []
     for logo in range(logosCount):
         fontFamilyId, fontFamily = getFontFamily(cnx)
         fontWeightId, fontWeight = getFontWeight(cnx)
         primaryColorId, primaryColor = getPrimaryColor(cnx)
-        logoAttributes = [{"Primary color": [primaryColorId, primaryColor]},
-                          {"Font family": [fontFamilyId, fontFamily]},
-                          {"Font weight": [fontWeightId, fontWeight]}] # You can add attributes here
+        voteUrl = url_for('get_logo_results',
+                          fontFamily=fontFamilyId,
+                          fontWeight=fontWeightId,
+                          primaryColor=primaryColorId)
+        logoAttributes = {"Vote url": voteUrl,
+                          "Primary color": primaryColor,
+                          "Primary color id": primaryColorId,
+                          "Font family": fontFamily,
+                          "Font family id": fontFamilyId,
+                          "Font weight": fontWeight,
+                          "Font weight id": fontWeightId,} # You can add attributes here
         logos.append(logoAttributes)
-        ipAddress = request.remote_addr
-        requestTime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        writeLogoView(cnx, fontFamilyId, fontWeightId, primaryColorId, ipAddress, requestTime)
     return logos
