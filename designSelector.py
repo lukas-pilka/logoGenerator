@@ -1,5 +1,87 @@
 import random
 from flask import request, url_for
+from connector import cloudSqlCnx
+
+# Expanding data for Machine Learning / Each attribute value has its own index
+def expandData(fitData,maxValues):
+    fitDataExpanded = []
+    for i in range(len(maxValues)):
+        for step in range(maxValues[i]):
+            if step == fitData[i]:
+                fitDataExpanded.append(1)
+            else:
+                fitDataExpanded.append(0)
+    return fitDataExpanded
+
+def getMaxValues(cnx):
+    with cnx.cursor() as cursor:
+
+        # Asking for maximum id values
+        cursor.execute('''
+                SELECT MAX(brand_archetype_id), MAX(brand_field_id), MAX(font_family_id), MAX(font_weight_id), MAX(primary_color_id)
+                FROM logo_views
+                ''')
+        maxValues = list(cursor.fetchall()[0])
+        return maxValues
+
+def getMlData(cnx, maxValues):
+    with cnx.cursor() as cursor:
+
+        # Asking for grouped logo views
+        cursor.execute('''
+                SELECT COUNT(id), brand_archetype_id, brand_field_id, font_family_id, font_weight_id, primary_color_id
+                FROM logo_views
+                GROUP BY brand_archetype_id, brand_field_id, font_family_id, font_weight_id, primary_color_id
+                ORDER BY COUNT(id) DESC;
+                ''')
+        logoViewsStats = cursor.fetchall()
+
+        # Asking for grouped logo votes
+        cursor.execute('''
+                SELECT COUNT(id), brand_archetype_id, brand_field_id, font_family_id, font_weight_id, primary_color_id
+                FROM logo_votes
+                GROUP BY brand_archetype_id, brand_field_id, font_family_id, font_weight_id, primary_color_id
+                ORDER BY COUNT(id) DESC;
+                ''')
+        logoVotesStats = cursor.fetchall()
+
+        # Iterating threw views and votes, counting group likes
+        mlAttributes = []
+        mlFitness = []
+        for viewGroup in range(len(logoViewsStats)):
+            viewGroupLikes = 0
+            viewsCount = logoViewsStats[viewGroup][0]
+            viewsAttributes = logoViewsStats[viewGroup][1:]
+
+            #Counting likes number for every viewGroup
+            for voteGroup in range(len(logoVotesStats)):
+                votesCount = logoVotesStats[voteGroup][0]
+                votesAttributes = logoVotesStats[voteGroup][1:]
+                if viewsAttributes == votesAttributes:
+                    viewGroupLikes += votesCount
+
+            # Calculating fitness
+            fitness = viewGroupLikes / viewsCount
+            mlFitness.append(fitness)
+
+            # Expanding data for Machine Learning / Each attribute value has its own index
+            expandedData = expandData(list(viewsAttributes), maxValues)
+            mlAttributes.append(expandedData)
+
+        return mlAttributes, mlFitness
+
+def predictFitness(guessData):
+    cnx = cloudSqlCnx() # Open connection
+    maxValues = getMaxValues(cnx)
+    mlAttributes, mlFitness = getMlData(cnx, maxValues)
+    from sklearn.neighbors import KNeighborsRegressor
+    regressor = KNeighborsRegressor(n_neighbors = 100, weights = "distance")
+    regressor.fit(mlAttributes, mlFitness)
+    predictions = []
+    for guess in guessData:
+        prediction = regressor.predict(guess)
+        predictions.append(prediction)
+    return predictions
 
 
 def getFontFamily(cnx):
@@ -28,17 +110,21 @@ def getPrimaryColor(cnx):
         rndPrimaryColor = allPrimaryColors[random.randint(0, len(allPrimaryColors) - 1)][1]
     return rndPrimaryColorId, rndPrimaryColor
 
-def getLogos(cnx,logosCount=3):
+def getLogos(cnx,brandName,brandArchetypeId,brandFieldId,logosCount=3):
     logos = []
     for logo in range(logosCount):
         fontFamilyId, fontFamily = getFontFamily(cnx)
         fontWeightId, fontWeight = getFontWeight(cnx)
         primaryColorId, primaryColor = getPrimaryColor(cnx)
         voteUrl = url_for('get_logo_results',
+                          brandName=brandName,
+                          brandArchetype=brandArchetypeId,
+                          brandField=brandFieldId,
                           fontFamily=fontFamilyId,
                           fontWeight=fontWeightId,
                           primaryColor=primaryColorId)
         logoAttributes = {"Vote url": voteUrl,
+                          "Brand name": brandName,
                           "Primary color": primaryColor,
                           "Primary color id": primaryColorId,
                           "Font family": fontFamily,
