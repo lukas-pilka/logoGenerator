@@ -126,25 +126,21 @@ def getLogos(cnx,brandName,brandArchetypeId,brandFieldId,logosCount=3):
         fontFamilyId, fontFamily = getFontFamily(cnx)
         fontWeightId, fontWeight = getFontWeight(cnx)
         primaryColorId, primaryColor = getPrimaryColor(cnx)
-        logoAttributes = {
-            "Primary color": {"id": primaryColorId, "value": primaryColor},
-            "Font family": {"id": fontFamilyId, "value": fontFamily},
-            "Font weight": {"id": fontWeightId, "value": fontWeight}
-            } # You can add attributes here
-        # voteUrl = url_for('get_logo_results',
-        #                   brandName=brandName,
-        #                   brandArchetype=brandArchetypeId,
-        #                   brandField=brandFieldId,
-        #                   fontFamily=fontFamilyId,
-        #                   fontWeight=fontWeightId,
-        #                   primaryColor=primaryColorId)
-        # logoAttributes = {"Vote url": voteUrl,
-        #                   "Brand name": brandName,
-        #                   "Primary color": primaryColor,
-        #                   "Primary color id": primaryColorId,
-        #                   "Font family": fontFamily,
-        #                   "Font family id": fontFamilyId,
-        #                   "Font weight": fontWeight,
-        #                   "Font weight id": fontWeightId,} # You can add attributes here
+        # You can add attributes here
+        voteUrl = url_for('get_logo_results',
+                           brandName=brandName,
+                           brandArchetype=brandArchetypeId,
+                           brandField=brandFieldId,
+                           fontFamily=fontFamilyId,
+                           fontWeight=fontWeightId,
+                           primaryColor=primaryColorId)
+        logoAttributes = {"Vote url": voteUrl,
+                           "Brand name": brandName,
+                           "Primary color": primaryColor,
+                           "Primary color id": primaryColorId,
+                           "Font family": fontFamily,
+                           "Font family id": fontFamilyId,
+                           "Font weight": fontWeight,
+                           "Font weight id": fontWeightId,} # You can add attributes here
         logos.append(logoAttributes)
     return logos
