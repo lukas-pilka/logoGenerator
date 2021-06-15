@@ -3,13 +3,13 @@
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 {% endblock %}
 {% block content %}
-    <h1>logo generator <em>Coooolheit</em></h1>
-    <form id="logo-generator-form">
-    {{logo_generator_form.csrf_token}}
-    {% for field in logo_generator_form %}
-        {{field}}
-    {% endfor %}
-    </form>
+    <form method="POST" action="/">
+    {{ form.brandName.label }} {{ form.brandName(size=50) }}
+    {{ form.csrf_token }}
+    {{ form.brandArchetype }}
+    {{ form.brandField }}
+    <input type="submit" value="Go">
+</form>
 {% endblock %}
 {% block end_scripts %}
     <script>

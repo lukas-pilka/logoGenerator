@@ -6,11 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/generic.css') }}">
+
+    <!-- JS -->
+    <script src="{{ url_for('static', filename='js/script.js') }}?v=1" defer></script>
+
     {% block start_scripts %}
     {% endblock %}
 </head>
 <body>
     <main>
+        <h1><a href="/">LogoGenerator</a></h1>
     {% block content %}
     {% endblock %}
     </main>

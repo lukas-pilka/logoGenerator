@@ -1,0 +1,15 @@
+{% extends 'main.html' %}
+{% block content %}
+    <h1>Logo Results</h1>
+    {% for logo in logos %}
+        <div>
+            {{ logo['Brand name'] }},
+            {{ logo['Font family'] }},
+            {{ logo['Font weight'] }},
+            {{ logo['Primary color'] }},
+            Fitness prediction: {{ logo['Fitness prediction'] }},
+            <a href="{{ logo['Vote url'] }}" onclick="voterPass();"><strong>Vote</strong></a>
+        </div>
+        <br>
+    {% endfor %}
+{% endblock %}

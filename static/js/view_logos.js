@@ -47,13 +47,13 @@ const buildLogos = (logos) => {
         const bbox = logoName.getBoundingClientRect()
         const fontScaleRatio = 200/bbox.width
         logosWrapper.lastElementChild.firstElementChild.style.fontSize = `${fontScaleRatio}em`
-        fetch(`/icon/${icons[index]}`)
-        .then(response => response.json())
-        .then(data => {
-            logoIcon.innerHTML = data.icon
-            logoIcon.style.fill = secondaryColor
-            logoIcon.style.marginBottom = (1 - fontScaleRatio) + "em"
-        })
+        // fetch(`/icon/${icons[index]}`)
+        // .then(response => response.json())
+        // .then(data => {
+        //     logoIcon.innerHTML = data.icon
+        //     logoIcon.style.fill = secondaryColor
+        //     logoIcon.style.marginBottom = (1 - fontScaleRatio) + "em"
+        // })
     })
     // icons.forEach((icon, index) => {
     //     fetch(`/icon/${icon}`)
