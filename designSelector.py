@@ -40,15 +40,20 @@ def writeLogoView(cnx,fontFamilyId,fontWeightId,primaryColorId,ipAddress,request
     cnx.commit()
 
 
-def getLogos(cnx,logosCount=3):
+def getLogos(cnx, logosCount=3):
     logos = []
     for logo in range(logosCount):
         fontFamilyId, fontFamily = getFontFamily(cnx)
         fontWeightId, fontWeight = getFontWeight(cnx)
         primaryColorId, primaryColor = getPrimaryColor(cnx)
-        logoAttributes = [{"Primary color": [primaryColorId, primaryColor]},
-                          {"Font family": [fontFamilyId, fontFamily]},
-                          {"Font weight": [fontWeightId, fontWeight]}] # You can add attributes here
+        # logoAttributes = [{"Primary color": [primaryColorId, primaryColor]},
+        #                   {"Font family": [fontFamilyId, fontFamily]},
+        #                   {"Font weight": [fontWeightId, fontWeight]}] # You can add attributes here
+        logoAttributes = {
+            "Primary color": {"id": primaryColorId, "value": primaryColor},
+            "Font family": {"id": fontFamilyId, "value": fontFamily},
+            "Font weight": {"id": fontWeightId, "value": fontWeight}
+            } # You can add attributes here
         logos.append(logoAttributes)
         ipAddress = request.remote_addr
         requestTime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")

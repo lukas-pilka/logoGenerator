@@ -1,0 +1,143 @@
+[
+    {
+      "fontFamily": {
+        "id": 10, 
+        "value": "Oswald"
+      }, 
+      "fontWeight": {
+        "id": 5, 
+        "value": 300
+      }, 
+      "primaryColor": {
+        "id": 3, 
+        "value": "gray"
+      }
+    }, 
+    {
+      "fontFamily": {
+        "id": 8, 
+        "value": "Open Sans"
+      }, 
+      "fontWeight": {
+        "id": 4, 
+        "value": 700
+      }, 
+      "primaryColor": {
+        "id": 1, 
+        "value": "gold"
+      }
+    }, 
+    {
+      "fontFamily": {
+        "id": 2, 
+        "value": "Roboto Condensed"
+      }, 
+      "fontWeight": {
+        "id": 4, 
+        "value": 800
+      }, 
+      "primaryColor": {
+        "id": 2, 
+        "value": "yellow"
+      }
+    }, 
+    {
+      "fontFamily": {
+        "id": 7, 
+        "value": "Roboto"
+      }, 
+      "fontWeight": {
+        "id": 6, 
+        "value": 800
+      }, 
+      "primaryColor": {
+        "id": 2, 
+        "value": "black"
+      }
+    }, 
+    {
+      "fontFamily": {
+        "id": 10, 
+        "value": "Roboto"
+      }, 
+      "fontWeight": {
+        "id": 5, 
+        "value": 100
+      }, 
+      "primaryColor": {
+        "id": 1, 
+        "value": "lime"
+      }
+    }, 
+    {
+      "fontFamily": {
+        "id": 7, 
+        "value": "Source Sans Pro"
+      }, 
+      "fontWeight": {
+        "id": 9, 
+        "value": 400
+      }, 
+      "primaryColor": {
+        "id": 1, 
+        "value": "green"
+      }
+    }, 
+    {
+      "fontFamily": {
+        "id": 6, 
+        "value": "Slabo 27px"
+      }, 
+      "fontWeight": {
+        "id": 5, 
+        "value": 700
+      }, 
+      "primaryColor": {
+        "id": 3, 
+        "value": "blue"
+      }
+    }, 
+    {
+      "fontFamily": {
+        "id": 5, 
+        "value": "Open Sans"
+      }, 
+      "fontWeight": {
+        "id": 9, 
+        "value": 400
+      }, 
+      "primaryColor": {
+        "id": 3, 
+        "value": "red"
+      }
+    }, 
+    {
+      "fontFamily": {
+        "id": 5, 
+        "value": "Raleway"
+      }, 
+      "fontWeight": {
+        "id": 2, 
+        "value": 300
+      }, 
+      "primaryColor": {
+        "id": 1, 
+        "value": "green"
+      }
+    }, 
+    {
+      "fontFamily": {
+        "id": 8, 
+        "value": "Montserrat"
+      }, 
+      "fontWeight": {
+        "id": 6, 
+        "value": 400
+      }, 
+      "primaryColor": {
+        "id": 1, 
+        "value": "blue"
+      }
+    }
+  ]
+  
