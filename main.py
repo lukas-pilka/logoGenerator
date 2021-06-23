@@ -68,14 +68,6 @@ def index():
 
 @app.route("/get_logo_results", methods=["GET","POST"])
 def get_logo_results():
-    # Honza's testing
-    static = bool(request.args.get("static", False))
-    length = int(request.args.get("length", 5))
-    if static:
-        with open(base/"static_response.json", "r") as input_file:
-            data = json.load(input_file)
-            data = [item for index, item in enumerate(data) if index < length]
-            return jsonify(*data), 200
 
     ipAddress = request.remote_addr
     requestTime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -88,7 +80,7 @@ def get_logo_results():
         brandField = int(receivedArguments['brandField'])
         voterPass = request.cookies.get('voterPass') # voterPass allows to submit vote
         cnx = cloudSqlCnx() # Open connection
-        logos = getLogos(cnx,brandName,brandArchetype,brandField,3) # gets a list of logos with their parameters
+        logos = getLogos(cnx, brandName, brandArchetype, brandField, 3) # gets a list of logos with their parameters
 
         # Adds logo views to database
         for logo in logos:
@@ -132,16 +124,14 @@ def runMachineLearning():
 def view_logos():
     return render_template("view_logos.html")
 
-@app.route("/svg/<family_name>/<style_name>/<content>", methods=["GET", "POST"]) # no post
-def svg(family_name, style_name, content):
+@app.route("/svg/<family_name>/<style_name>/<content>", methods=["GET"])
+def svg(family_name: str, style_name: str, content: str):
     font = TTFont(base/"fonts"/family_name/f"{style_name}.ttf")
     cmap = font.getBestCmap()
     glyphSet = font.getGlyphSet()
     recording_pen = RecordingPen()
     offset = 0
     yMax = 0
-    left_margin = 0
-    right_margin = 0
     for index, character in enumerate(content):
         glyph_name = cmap.get(ord(character))
         glyph = glyphSet[glyph_name]
@@ -161,8 +151,6 @@ def svg(family_name, style_name, content):
     transform_pen = TransformPen(svgpen, (1, 0, 0, -1, -offset/2, yMax/2))
     recording_pen.replay(transform_pen)
     return {"svg": svgpen.getCommands()}, 200
-
-# https://github.com/mozman/svgwrite
 
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=8080, debug=True)

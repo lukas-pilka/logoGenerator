@@ -18,21 +18,19 @@ const buildLogo = (wrapper, logoData) => {
     textBox.y -= svgBox.y
 
     if (logoData.shapeName == "oval") {
-        return
+        const [fill, strokeLineJoin, strokeWidth, adjustToContent, steps, type] = logoData.args
         const diagonal = elementDiagonal(textBox)
         shape = wavyOval({
-            width: logoData.oval.value.adjustToContent ? textBox.width/Math.sqrt(2) * 2 : diagonal + 25,
-            height: logoData.oval.value.adjustToContent ? textBox.height/Math.sqrt(2) * 2  : diagonal + 25,
-            widthSpike: logoData.oval.value.widthSpike,
-            heightSpike: logoData.oval.value.heightSpike,
-            type: logoData.oval.value.type,
-            steps: logoData.oval.value.steps
+            width: adjustToContent ? textBox.width/Math.sqrt(2) * 2 : diagonal + 25,
+            height: adjustToContent ? textBox.height/Math.sqrt(2) * 2  : diagonal + 25,
+            type: type,
+            steps: steps
         })
         shape.setAttribute("transform", "translate(150 150)")
-        shape.setAttribute("fill", logoData.oval.value.fill)
-        shape.setAttribute("stroke", logoData.oval.value.stroke)
-        shape.setAttribute("stroke-width", logoData.oval.value.strokeWidth)
-        shape.setAttribute("stroke-linejoin", logoData.oval.value.strokeLineJoin)
+        shape.setAttribute("fill", parseInt(fill) ? logoData["Primary color"] : "transparent")
+        shape.setAttribute("stroke", "black")
+        shape.setAttribute("stroke-width", strokeWidth)
+        shape.setAttribute("stroke-linejoin", strokeLineJoin)
         shape.setAttribute("stroke-miterlimit", 0)
         svg.insertBefore(shape, svg.firstElementChild)
     }
@@ -60,13 +58,16 @@ const buildLogo = (wrapper, logoData) => {
         }
     }
     if (logoData.shapeName = "boxAround") {
-        return
-        const box = boxAround(textBox, logoData.boxAround.value.offset + logoData.boxAround.value.strokeWidth/2)
+        let [strokeWidth, offset, fill, stroke] = logoData.args
+        strokeWidth = parseFloat(strokeWidth)
+        offset = parseFloat(offset)
+
+        const box = boxAround(textBox, offset + strokeWidth/2)
         svg.insertBefore(box, text)
-        box.setAttribute("fill", logoData.boxAround.value.fill ? logoData.boxAround.value.fill : "transparent" )
-        box.setAttribute("stroke", logoData.boxAround.value.stroke ? logoData.boxAround.value.stroke : "transparent" )
-        box.setAttribute("transform", `translate(${textBox.x - logoData.boxAround.value.offset - logoData.boxAround.value.strokeWidth/2} ${textBox.y - logoData.boxAround.value.offset-logoData.boxAround.value.strokeWidth/2})`)
-        box.setAttribute("stroke-width", logoData.boxAround.value.strokeWidth)
+        box.setAttribute("fill", fill ? "transparent" : "transparent" )
+        box.setAttribute("stroke", stroke ? stroke : "transparent" )
+        box.setAttribute("transform", `translate(${textBox.x - offset - strokeWidth/2} ${textBox.y - offset - strokeWidth/2})`)
+        box.setAttribute("stroke-width", strokeWidth)
         box.setAttribute("stroke-alignment", "outside")
     }
 }

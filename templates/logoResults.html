@@ -10,21 +10,14 @@
 {% endblock %}
 {% block content %}
     <h1>Logo Results</h1>
-    {% for logo in logos %}
-        <div class="logo">
-            {{ logo['Brand name'] }},
-            {{ logo['Font family'] }},
-            {{ logo['Font weight'] }},
-            {{ logo['Primary color'] }},
-            {{ logo['Shape'] }},
-            {{ logo['Shape id'] }},
-            {{ logo['Text transform name'] }},
-            {{ logo['Text transform id'] }},
-            Fitness prediction: {{ logo['Fitness prediction'] }},
-            <a href="{{ logo['Vote url'] }}" onclick="voterPass();"><strong>Vote</strong></a>
-        </div>
-        <br>
-    {% endfor %}
+    <div class="logos">
+        {% for logo in logos %}
+            <a href="{{ logo['Vote url'] }}" onclick="voterPass();"><span class="logo"></span></a>
+        {% endfor %}
+        {% for i in range(3) %}
+            <a href="#" class="logo-wrapper"><span>{{loop.index}}</span></a>
+        {% endfor %}
+    </div>
 {% endblock %}
 {% block end_scripts %}
     <script>
@@ -34,9 +27,8 @@
             fetch(`/svg/Oswald/Oswald-Regular/${logo["Brand name"]}`)
             .then(response => response.json())
             .then(data => {
-
-                // [logo.shapeName, logo.args] = logo["Shape"].split("_")
-                [logo.shapeName, ...logo.args] = "textDecoration_10_10_3_1_1".split("_")
+                [logo.shapeName, ...logo.args] = logo["Shape"].split("_")
+                // [logo.shapeName, ...logo.args] = "textDecoration_10_10_3_1_1".split("_")
                 const path = document.createElementNS(svgNS, "path")
                 path.setAttribute("d", data.svg)
                 logo.svg = path

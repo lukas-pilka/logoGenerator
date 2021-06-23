@@ -7,5 +7,6 @@ venv/*
 pyvenv.cfg
 cloud_sql_proxy
 .idea
+.vscode
 app.yaml
 /app.yaml
