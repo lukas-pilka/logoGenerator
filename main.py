@@ -1,11 +1,7 @@
-try:
-    from  fontTools.ttLib import TTFont
-    from fontTools.pens.svgPathPen import SVGPathPen
-    from fontTools.pens.transformPen import TransformPen
-    from fontTools.pens.recordingPen import RecordingPen
-except Exception as e:
-    print(e)
-
+from fontTools.ttLib import TTFont
+from fontTools.pens.svgPathPen import SVGPathPen
+from fontTools.pens.transformPen import TransformPen
+from fontTools.pens.recordingPen import RecordingPen
 from flask import Flask, render_template, redirect, request, url_for, json, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect, CSRFError
