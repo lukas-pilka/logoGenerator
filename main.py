@@ -125,7 +125,7 @@ def runMachineLearning():
 def view_logos():
     return render_template("view_logos.html")
 
-@app.route("/svg/<family_name>/<weight>/<content>", methods=["GET"])
+@app.route("/svg/<family_name>/<style_name>/<content>", methods=["GET"])
 def svg(family_name: str, style_name: str, content: str):
     font = TTFont(base/"fonts"/family_name/f"{style_name}.ttf")
     cmap = font.getBestCmap()
