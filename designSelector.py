@@ -71,6 +71,7 @@ def getMlData(cnx, maxValues):
 
         return mlAttributes, mlFitness
 
+
 def predictFitness(guessData):
     cnx = cloudSqlCnx() # Open connection
     maxValues = getMaxValues(cnx)
@@ -80,8 +81,9 @@ def predictFitness(guessData):
     regressor.fit(mlAttributes, mlFitness)
 
     # numpy reshaping is necessary because it is a single guess prediction
-    npGuessData = numpy.array([guessData]).reshape(1, -1)
-    prediction = regressor.predict(npGuessData)
+    npGuessData = numpy.array(guessData).reshape(1, -1)
+    prediction = regressor.predict(npGuessData)[0]
+    prediction = prediction.item() #converting numpy float64 to python float
     return prediction
 
 
