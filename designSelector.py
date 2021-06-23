@@ -128,19 +128,19 @@ def getLogos(cnx,brandName,brandArchetypeId,brandFieldId,logosCount=3):
         primaryColorId, primaryColor = getPrimaryColor(cnx)
         # You can add attributes here
         voteUrl = url_for('get_logo_results',
-                           brandName=brandName,
-                           brandArchetype=brandArchetypeId,
-                           brandField=brandFieldId,
-                           fontFamily=fontFamilyId,
-                           fontWeight=fontWeightId,
-                           primaryColor=primaryColorId)
+                          brandName=brandName,
+                          brandArchetype=brandArchetypeId,
+                          brandField=brandFieldId,
+                          fontFamily=fontFamilyId,
+                          fontWeight=fontWeightId,
+                          primaryColor=primaryColorId)
         logoAttributes = {"Vote url": voteUrl,
-                           "Brand name": brandName,
-                           "Primary color": primaryColor,
-                           "Primary color id": primaryColorId,
-                           "Font family": fontFamily,
-                           "Font family id": fontFamilyId,
-                           "Font weight": fontWeight,
-                           "Font weight id": fontWeightId,} # You can add attributes here
+                          "Brand name": brandName,
+                          "Primary color": primaryColor,
+                          "Primary color id": primaryColorId,
+                          "Font family": fontFamily,
+                          "Font family id": fontFamilyId,
+                          "Font weight": fontWeight,
+                          "Font weight id": fontWeightId,} # You can add attributes here
         logos.append(logoAttributes)
     return logos

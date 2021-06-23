@@ -1,143 +1,122 @@
 [
     {
-      "fontFamily": {
-        "id": 10, 
-        "value": "Oswald"
-      }, 
-      "fontWeight": {
-        "id": 5, 
-        "value": 300
-      }, 
-      "primaryColor": {
-        "id": 3, 
-        "value": "gray"
-      }
-    }, 
+        "fontFamily": {
+            "id": 10,
+            "value": "OpenSans/OpenSans-Regular"
+        },
+        "fontWeight": {
+            "id": 5,
+            "value": 300
+        },
+        "primaryColor": {
+            "id": 3,
+            "value": "gray"
+        },
+        "oval": {
+            "value": null
+        },
+        "textDecoration": {
+            "value": {
+                "step": 10,
+                "height": 10,
+                "strokeWidth": 3,
+                "bottom": true,
+                "top": true 
+            }
+        },
+        "initials": {
+            "value": false
+        }
+    }, {
+        "fontFamily": {
+            "id": 10,
+            "value": "Oswald/Oswald-Regular"
+        },
+        "fontWeight": {
+            "id": 5,
+            "value": 300
+        },
+        "primaryColor": {
+            "id": 3,
+            "value": "red"
+        },
+        "oval": {
+            "value": null
+        },
+        "initials": {
+            "value": true
+        },
+        "boxAround": {
+            "value": {
+                "strokeWidth": 1,
+                "offset": 30,
+                "fill": false,
+                "stroke": "black"
+            }
+        },
+        "textDecorationWavy": {
+            "value": null
+        }
+    }, {
+        "fontFamily": {
+            "id": 8,
+            "value": "Oswald/Oswald-Medium"
+        },
+        "fontWeight": {
+            "id": 4,
+            "value": 700
+        },
+        "primaryColor": {
+            "id": 1,
+            "value": "gold"
+        },
+        "oval": {
+            "value": {
+                "fill": "none",
+                "stroke": "black",
+                "strokeLineJoin": "round",
+                "strokeWidth": 4,
+                "adjustToContent": false,
+                "steps": 60,
+                "type": "spiky"
+            }
+        },
+        "textDecorationWavy": {
+            "value": null
+        },
+        "initials": {
+            "value": false
+        }
+    },
     {
-      "fontFamily": {
-        "id": 8, 
-        "value": "Open Sans"
-      }, 
-      "fontWeight": {
-        "id": 4, 
-        "value": 700
-      }, 
-      "primaryColor": {
-        "id": 1, 
-        "value": "gold"
-      }
-    }, 
-    {
-      "fontFamily": {
-        "id": 2, 
-        "value": "Roboto Condensed"
-      }, 
-      "fontWeight": {
-        "id": 4, 
-        "value": 800
-      }, 
-      "primaryColor": {
-        "id": 2, 
-        "value": "yellow"
-      }
-    }, 
-    {
-      "fontFamily": {
-        "id": 7, 
-        "value": "Roboto"
-      }, 
-      "fontWeight": {
-        "id": 6, 
-        "value": 800
-      }, 
-      "primaryColor": {
-        "id": 2, 
-        "value": "black"
-      }
-    }, 
-    {
-      "fontFamily": {
-        "id": 10, 
-        "value": "Roboto"
-      }, 
-      "fontWeight": {
-        "id": 5, 
-        "value": 100
-      }, 
-      "primaryColor": {
-        "id": 1, 
-        "value": "lime"
-      }
-    }, 
-    {
-      "fontFamily": {
-        "id": 7, 
-        "value": "Source Sans Pro"
-      }, 
-      "fontWeight": {
-        "id": 9, 
-        "value": 400
-      }, 
-      "primaryColor": {
-        "id": 1, 
-        "value": "green"
-      }
-    }, 
-    {
-      "fontFamily": {
-        "id": 6, 
-        "value": "Slabo 27px"
-      }, 
-      "fontWeight": {
-        "id": 5, 
-        "value": 700
-      }, 
-      "primaryColor": {
-        "id": 3, 
-        "value": "blue"
-      }
-    }, 
-    {
-      "fontFamily": {
-        "id": 5, 
-        "value": "Open Sans"
-      }, 
-      "fontWeight": {
-        "id": 9, 
-        "value": 400
-      }, 
-      "primaryColor": {
-        "id": 3, 
-        "value": "red"
-      }
-    }, 
-    {
-      "fontFamily": {
-        "id": 5, 
-        "value": "Raleway"
-      }, 
-      "fontWeight": {
-        "id": 2, 
-        "value": 300
-      }, 
-      "primaryColor": {
-        "id": 1, 
-        "value": "green"
-      }
-    }, 
-    {
-      "fontFamily": {
-        "id": 8, 
-        "value": "Montserrat"
-      }, 
-      "fontWeight": {
-        "id": 6, 
-        "value": 400
-      }, 
-      "primaryColor": {
-        "id": 1, 
-        "value": "blue"
-      }
+        "fontFamily": {
+            "id": 8,
+            "value": "OpenSans/OpenSans-ExtraBoldItalic"
+        },
+        "fontWeight": {
+            "id": 4,
+            "value": 700
+        },
+        "primaryColor": {
+            "id": 1,
+            "value": "aqua"
+        },
+        "oval": {
+            "value": {
+                "fill": "none",
+                "stroke": "black",
+                "strokeLineJoin": "round",
+                "strokeWidth": 4,
+                "adjustToContent": true,
+                "steps": 100,
+                "type": "perlin"
+            }
+        },
+        "textDecorationWavy": {
+            "value": null
+        },
+        "initials": {
+            "value": false
+        }
     }
-  ]
-  
+]

@@ -1,3 +1,11 @@
+try:
+    from  fontTools.ttLib import TTFont
+    from fontTools.pens.svgPathPen import SVGPathPen
+    from fontTools.pens.transformPen import TransformPen
+    from fontTools.pens.recordingPen import RecordingPen
+except Exception as e:
+    print(e)
+
 from flask import Flask, render_template, redirect, request, url_for, json, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect, CSRFError
@@ -6,6 +14,8 @@ from designSelector import *
 from datetime import datetime
 from connector import cloudSqlCnx
 from pathlib import Path
+
+
 
 base = Path(__file__).parent
 
@@ -136,11 +146,37 @@ def runMachineLearning():
 def view_logos():
     return render_template("view_logos.html")
 
-@app.route("/icon/<name>", methods=["GET", "POST"]) # no post
-def icon(name):
-    with open(base/"icons"/f"{name}.svg", "r") as input_file:
-        return {"icon": input_file.read()}, 200
+@app.route("/svg/<family_name>/<style_name>/<content>", methods=["GET", "POST"]) # no post
+def svg(family_name, style_name, content):
+    font = TTFont(base/"fonts"/family_name/f"{style_name}.ttf")
+    cmap = font.getBestCmap()
+    glyphSet = font.getGlyphSet()
+    recording_pen = RecordingPen()
+    offset = 0
+    yMax = 0
+    left_margin = 0
+    right_margin = 0
+    for index, character in enumerate(content):
+        glyph_name = cmap.get(ord(character))
+        glyph = glyphSet[glyph_name]
+        transform_pen = TransformPen(recording_pen, (1, 0, 0, 1, offset, 0))
+        glyph.draw(transform_pen)
+        glyf_glyph = font["glyf"][glyph_name]
+        try:
+            if glyf_glyph.yMax > yMax:
+                yMax = glyf_glyph.yMax
+        except:
+            pass
+        offset += glyph.width
+        if index == 0:
+            left_margin = glyf_glyph.xMin
+
+    svgpen = SVGPathPen(glyphSet)
+    transform_pen = TransformPen(svgpen, (1, 0, 0, -1, -offset/2, yMax/2))
+    recording_pen.replay(transform_pen)
+    return {"svg": svgpen.getCommands()}, 200
+
+# https://github.com/mozman/svgwrite
 
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=8080, debug=True)
-

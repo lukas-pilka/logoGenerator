@@ -1,15 +1,45 @@
 {% extends 'main.html' %}
+{% block start_scripts %}
+    <script src="{{ url_for('static', filename='js/tinycolor-min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/opentype.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/typography.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/oval.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/logoBuilder.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/helpers.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/perlin.js') }}"></script>
+{% endblock %}
 {% block content %}
     <h1>Logo Results</h1>
     {% for logo in logos %}
-        <div>
+        <div class="logo">
             {{ logo['Brand name'] }},
             {{ logo['Font family'] }},
             {{ logo['Font weight'] }},
             {{ logo['Primary color'] }},
+            {{ logo['Shape'] }},
+            {{ logo['Shape id'] }},
+            {{ logo['Text transform name'] }},
+            {{ logo['Text transform id'] }},
             Fitness prediction: {{ logo['Fitness prediction'] }},
             <a href="{{ logo['Vote url'] }}" onclick="voterPass();"><strong>Vote</strong></a>
         </div>
         <br>
     {% endfor %}
+{% endblock %}
+{% block end_scripts %}
+    <script>
+        const logos = {{logos | tojson}}
+        const logoWrappers = document.getElementsByClassName(".logo")
+        logos.forEach((logo, index) => {
+            // fetch(`/svg/${logo["Font family"]}/${logo["Brand name"]}`)
+            fetch(`/svg/Oswald/Oswald-Regular/${logo["Brand name"]}`)
+            .then(response => response.json())
+            .then(data => {
+                const path = document.createElementNS(svgNS, "path")
+                path.setAttribute("d", data.svg)
+                logo.svg = path
+                buildLogo(logoWrappers[index], logo)
+            })    
+        })
+    </script>
 {% endblock %}
