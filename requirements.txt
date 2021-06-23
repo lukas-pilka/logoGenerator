@@ -15,5 +15,7 @@ zipp==3.4.1
 PyMySQL==1.0.2
 python-dotenv==0.17.1
 scikit-learn==0.24.2
+numpy==1.20.3
+
 
 

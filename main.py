@@ -15,6 +15,8 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///site.db"
 # csrf = CSRFProtect(app)
 db = SQLAlchemy(app)
 
+
+
 def writeLogoView(cnx,brandName, brandArchetypeId, brandFieldId, fontFamilyId, fontWeightId, primaryColorId, ipAddress, requestTime):
     # Write logo view into logo_views table
     with cnx.cursor() as cursor:
@@ -72,27 +74,15 @@ def get_logo_results():
     ipAddress = request.remote_addr
     requestTime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     receivedArguments = request.args.to_dict(flat=True)
+
+    # Check if it receives arguments and if so it returns logo results
     if {'brandName', 'brandArchetype', 'brandField'} <= receivedArguments.keys():
         brandName = receivedArguments['brandName']
         brandArchetype = int(receivedArguments['brandArchetype'])
         brandField = int(receivedArguments['brandField'])
-
         voterPass = request.cookies.get('voterPass') # voterPass allows to submit vote
         cnx = cloudSqlCnx() # Open connection
-        logos = getLogos(cnx,brandName,brandArchetype,brandField,10) # connection, count of logos
-
-        # Preparing data for fitness prediction
-        maxValues = getMaxValues(cnx)
-        predictionInputs = []
-        for logo in logos:
-            fitData = [brandArchetype, brandField, logo['Font family id'], logo['Font weight id'], logo['Primary color id']]
-            guessData = expandData(fitData, maxValues)
-            predictionInputs.append([guessData])
-
-        # Receiving predictions and appending logos
-        predictionOutputs = predictFitness(predictionInputs)
-        for i in range(len(logos)):
-            logos[i]['Fitness prediction'] = predictionOutputs[i][0]
+        logos = getLogos(cnx,brandName,brandArchetype,brandField,10) # gets a list of logos with their parameters
 
         # Adds logo views to database
         for logo in logos:
@@ -119,7 +109,7 @@ def get_logo_results():
                           ipAddress,
                           requestTime)
         else:
-            print('Not voting')
+            print('No cookie, no voting')
 
         # Close connection
         cnx.close()

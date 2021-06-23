@@ -1,6 +1,7 @@
 import random
 from flask import request, url_for
 from connector import cloudSqlCnx
+import numpy
 
 # Expanding data for Machine Learning / Each attribute value has its own index
 def expandData(fitData,maxValues):
@@ -75,13 +76,13 @@ def predictFitness(guessData):
     maxValues = getMaxValues(cnx)
     mlAttributes, mlFitness = getMlData(cnx, maxValues)
     from sklearn.neighbors import KNeighborsRegressor
-    regressor = KNeighborsRegressor(n_neighbors = 100, weights = "distance")
+    regressor = KNeighborsRegressor(n_neighbors = 10, weights = "distance")
     regressor.fit(mlAttributes, mlFitness)
-    predictions = []
-    for guess in guessData:
-        prediction = regressor.predict(guess)
-        predictions.append(prediction)
-    return predictions
+
+    # numpy reshaping is necessary because it is a single guess prediction
+    npGuessData = numpy.array([guessData]).reshape(1, -1)
+    prediction = regressor.predict(npGuessData)
+    return prediction
 
 
 def getFontFamily(cnx):
@@ -120,27 +121,35 @@ def writeLogoView(cnx,fontFamilyId,fontWeightId,primaryColorId,ipAddress,request
     cnx.commit()
 
 
-def getLogos(cnx,brandName,brandArchetypeId,brandFieldId,logosCount=3):
+def getLogos(cnx, brandName, brandArchetypeId, brandFieldId, logosCount=3):
     logos = []
     for logo in range(logosCount):
         fontFamilyId, fontFamily = getFontFamily(cnx)
         fontWeightId, fontWeight = getFontWeight(cnx)
         primaryColorId, primaryColor = getPrimaryColor(cnx)
+
+        # Preparing data for fitness prediction
+        maxValues = getMaxValues(cnx)
+        fitData = [brandArchetypeId, brandFieldId, fontFamilyId, fontWeightId, primaryColorId]
+        guessData = expandData(fitData, maxValues)
+        fitnessPrediction = predictFitness(guessData)
+
         # You can add attributes here
         voteUrl = url_for('get_logo_results',
-                           brandName=brandName,
-                           brandArchetype=brandArchetypeId,
-                           brandField=brandFieldId,
-                           fontFamily=fontFamilyId,
-                           fontWeight=fontWeightId,
-                           primaryColor=primaryColorId)
+                          brandName=brandName,
+                          brandArchetype=brandArchetypeId,
+                          brandField=brandFieldId,
+                          fontFamily=fontFamilyId,
+                          fontWeight=fontWeightId,
+                          primaryColor=primaryColorId)
         logoAttributes = {"Vote url": voteUrl,
-                           "Brand name": brandName,
-                           "Primary color": primaryColor,
-                           "Primary color id": primaryColorId,
-                           "Font family": fontFamily,
-                           "Font family id": fontFamilyId,
-                           "Font weight": fontWeight,
-                           "Font weight id": fontWeightId,} # You can add attributes here
+                          "Brand name": brandName,
+                          "Primary color": primaryColor,
+                          "Primary color id": primaryColorId,
+                          "Font family": fontFamily,
+                          "Font family id": fontFamilyId,
+                          "Font weight": fontWeight,
+                          "Font weight id": fontWeightId,
+                          "Fitness prediction": fitnessPrediction,}  # You can add attributes here
         logos.append(logoAttributes)
     return logos
