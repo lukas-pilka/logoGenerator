@@ -111,6 +111,25 @@ def getPrimaryColor(cnx):
         rndPrimaryColor = allPrimaryColors[random.randint(0, len(allPrimaryColors) - 1)][1]
     return rndPrimaryColorId, rndPrimaryColor
 
+
+def getTextTransform(cnx):
+    with cnx.cursor() as cursor:
+        cursor.execute('select * from text_transforms;')
+        allTextTransforms = cursor.fetchall()
+        rndTextTransformId = allTextTransforms[random.randint(0, len(allTextTransforms) - 1)][0]
+        rndTextTransform = allTextTransforms[random.randint(0, len(allTextTransforms) - 1)][1]
+    return rndTextTransformId, rndTextTransform
+
+
+def getShape(cnx):
+    with cnx.cursor() as cursor:
+        cursor.execute('select * from shapes;')
+        allShapes = cursor.fetchall()
+        rndShapeId = allShapes[random.randint(0, len(allShapes) - 1)][0]
+        rndShape = allShapes[random.randint(0, len(allShapes) - 1)][1]
+    return rndShapeId, rndShape
+
+
 def writeLogoView(cnx,fontFamilyId,fontWeightId,primaryColorId,ipAddress,requestTime):
     # Write logo view into logo_views table
     with cnx.cursor() as cursor:
@@ -126,7 +145,9 @@ def getLogos(cnx, brandName, brandArchetypeId, brandFieldId, logosCount=3):
     for logo in range(logosCount):
         fontFamilyId, fontFamily = getFontFamily(cnx)
         fontWeightId, fontWeight = getFontWeight(cnx)
+        textTransformId, textTransform = getTextTransform(cnx)
         primaryColorId, primaryColor = getPrimaryColor(cnx)
+        shapeId, shape = getShape(cnx)
 
         # Preparing data for fitness prediction
         maxValues = getMaxValues(cnx)
@@ -150,10 +171,10 @@ def getLogos(cnx, brandName, brandArchetypeId, brandFieldId, logosCount=3):
                           "Font family id": fontFamilyId,
                           "Font weight": fontWeight,
                           "Font weight id": fontWeightId,
-                          "Shape": "Square",
-                          "Shape id": 1,
-                          "Text transform": "Style1",
-                          "Text transform id": 1,
+                          "Text transform": textTransform,
+                          "Text transform id": textTransformId,
+                          "Shape": shape,
+                          "Shape id": shapeId,
                           "Fitness prediction": fitnessPrediction,}  # You can add attributes here
         logos.append(logoAttributes)
     return logos
