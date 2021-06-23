@@ -92,9 +92,7 @@ def get_logo_results():
         brandField = int(receivedArguments['brandField'])
         voterPass = request.cookies.get('voterPass') # voterPass allows to submit vote
         cnx = cloudSqlCnx() # Open connection
-        logos = getLogos(cnx,brandName,brandArchetype,brandField,1) # gets a list of logos with their parameters
-        for logo in logos:
-            print(logo)
+        logos = getLogos(cnx,brandName,brandArchetype,brandField,3) # gets a list of logos with their parameters
 
         # Adds logo views to database
         for logo in logos:
