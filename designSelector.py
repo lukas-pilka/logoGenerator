@@ -150,6 +150,10 @@ def getLogos(cnx, brandName, brandArchetypeId, brandFieldId, logosCount=3):
                           "Font family id": fontFamilyId,
                           "Font weight": fontWeight,
                           "Font weight id": fontWeightId,
+                          "Shape": "Square",
+                          "Shape id": 1,
+                          "Text transform": "Style1",
+                          "Text transform id": 1,
                           "Fitness prediction": fitnessPrediction,}  # You can add attributes here
         logos.append(logoAttributes)
     return logos
