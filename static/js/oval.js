@@ -49,7 +49,7 @@ const wavyOval = ({width, height, steps, type = "spiky"}) => {
             pathData.push(`${x} ${y}`)                    
         }
     }
-    if (["cloudyOutside", "wavy", "perlin"].includes(type)) {
+    if (["cloudyOutside", "cloudyInside", "wavy", "perlin"].includes(type)) {
         pathData.splice(0, 0, `M ${pathData[pathData.length - 1]}`)
     }
     pathData.push("Z")

@@ -1,5 +1,9 @@
 @import "./variables.scss";
 
+html, body {
+    font-family: Helvetica;
+}
+
 body {
     padding: 0;
     margin: 0;
@@ -8,8 +12,9 @@ body {
 form {
     display: flex;
     flex-direction: column;
-    > * + * {
-        margin-top: 1em;
+    .radio-input-wrapper {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
     }
 }
 

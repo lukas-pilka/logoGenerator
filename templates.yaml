@@ -1,0 +1,48 @@
+oval:
+  fill:
+    - 0
+    - 1
+  strokeLineJoin:
+    - round
+    - square
+  strokeWidth:
+    - 1
+    - 4
+    - 10
+    - 20
+  adjustToContent:
+    - 1
+    - 0
+  steps:
+    - 30
+    - 42
+    - 70
+    - 100
+  type:
+    - spiky
+    - cloudyOutside
+    - cloudyInside
+
+textDecoration:
+  step:
+    - 3
+    - 6
+    - 20
+    - 40
+    - 100
+  height:
+    - 4
+    - 10
+    - 20
+    - 40
+  strokeWidth:
+    - 1
+    - 4
+    - 10
+    - 20
+  bottom:
+    - 1
+    - 0
+  top:
+    - 1
+    - 0

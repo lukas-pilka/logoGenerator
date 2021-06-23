@@ -4,6 +4,7 @@ from wtforms.fields import RadioField, StringField
 from wtforms.validators import InputRequired
 from wtforms.validators import DataRequired
 from connector import cloudSqlCnx
+from widgets import radio_input_widget
 
 cnx = cloudSqlCnx() # Open connection
 def getArchetypes(cnx):
@@ -21,10 +22,14 @@ def getBusinesses(cnx):
 
 class brandProfile(FlaskForm):
     brandArchetype = RadioField(
+        label="Charakter firmy",
+        widget=radio_input_widget,
         choices=getArchetypes(cnx),
         validators=[InputRequired()]
     )
     brandField = RadioField(
+        label="Zaměření firmy",
+        widget=radio_input_widget,
         choices=getBusinesses(cnx),
         validators=[InputRequired()]
     )

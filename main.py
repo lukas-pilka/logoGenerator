@@ -10,16 +10,17 @@ from designSelector import *
 from datetime import datetime
 from connector import cloudSqlCnx
 from pathlib import Path
-
+from flask import Flask
+from flaskext.mysql import MySQL
+from random import randint
 
 
 base = Path(__file__).parent
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = "abc"
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///site.db"
-# csrf = CSRFProtect(app)
-db = SQLAlchemy(app)
+app.config["SECRET_KEY"] = "blue_" + "-".join([str(randint(0, 64)) for i in range(64)]) + "_ghost"
+csrf = CSRFProtect(app)
+
 
 
 
@@ -124,7 +125,7 @@ def runMachineLearning():
 def view_logos():
     return render_template("view_logos.html")
 
-@app.route("/svg/<family_name>/<style_name>/<content>", methods=["GET"])
+@app.route("/svg/<family_name>/<weight>/<content>", methods=["GET"])
 def svg(family_name: str, style_name: str, content: str):
     font = TTFont(base/"fonts"/family_name/f"{style_name}.ttf")
     cmap = font.getBestCmap()

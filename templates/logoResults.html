@@ -12,10 +12,10 @@
     <h1>Logo Results</h1>
     <div class="logos">
         {% for logo in logos %}
-            <a href="{{ logo['Vote url'] }}" onclick="voterPass();"><span class="logo"></span></a>
-        {% endfor %}
-        {% for i in range(3) %}
-            <a href="#" class="logo-wrapper"><span>{{loop.index}}</span></a>
+            <a href="{{ logo['Vote url'] }}" onclick="voterPass();">
+                <span class="logo"></span>
+                <small>{{logo}}</small>
+            </a>
         {% endfor %}
     </div>
 {% endblock %}
@@ -28,7 +28,6 @@
             .then(response => response.json())
             .then(data => {
                 [logo.shapeName, ...logo.args] = logo["Shape"].split("_")
-                // [logo.shapeName, ...logo.args] = "textDecoration_10_10_3_1_1".split("_")
                 const path = document.createElementNS(svgNS, "path")
                 path.setAttribute("d", data.svg)
                 logo.svg = path

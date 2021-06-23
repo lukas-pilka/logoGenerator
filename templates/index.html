@@ -6,7 +6,9 @@
     <form method="POST" action="/">
     {{ form.brandName.label }} {{ form.brandName(size=50) }}
     {{ form.csrf_token }}
+    {{ form.brandArchetype.label }}
     {{ form.brandArchetype }}
+    {{ form.brandField.label }}
     {{ form.brandField }}
     <input type="submit" value="Go">
 </form>
