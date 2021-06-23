@@ -1,13 +1,11 @@
 svgNS = "http://www.w3.org/2000/svg"
 
 const buildLogo = (wrapper, logoData) => {
-    console.log("hi")
-    return
+    console.log(wrapper)
     const svg = document.createElementNS(svgNS, "svg")
-    svg.style.background = logoData.primaryColor.value
+    svg.style.background = logoData["Primary color"]
     svg.setAttribute("height", 300)
     svg.setAttribute("width", 300)
-    // document.getElementById("logos-wrapper").appendChild(svg)
     wrapper.appendChild(svg)
     const text = logoData.svg
     svg.appendChild(text)
@@ -19,7 +17,8 @@ const buildLogo = (wrapper, logoData) => {
     textBox.x -= svgBox.x
     textBox.y -= svgBox.y
 
-    if (logoData.oval.value) {
+    if (logoData.shapeName == "oval") {
+        return
         const diagonal = elementDiagonal(textBox)
         shape = wavyOval({
             width: logoData.oval.value.adjustToContent ? textBox.width/Math.sqrt(2) * 2 : diagonal + 25,
@@ -38,27 +37,30 @@ const buildLogo = (wrapper, logoData) => {
         svg.insertBefore(shape, svg.firstElementChild)
     }
 
-    if (logoData.textDecorationWavy.value) {
+    if (logoData.shapeName = "textDecoration") {
+        const [step, height, strokeWidth, bottom, top] = logoData.args
+        console.log(logoData.args)
         const shape = wave({
-            step: logoData.textDecorationWavy.value.step,
-            height: logoData.textDecorationWavy.value.height,
-            steps: textBox.width/logoData.textDecorationWavy.value.step
+            step: parseFloat(step),
+            height: parseFloat(height),
+            steps: textBox.width/parseFloat(step)
         })
         shape.setAttribute("fill", "none")
         shape.setAttribute("stroke", "black")
-        shape.setAttribute("stroke-width", logoData.textDecorationWavy.value.strokeWidth)
-        if (logoData.textDecorationWavy.value.top) {
+        shape.setAttribute("stroke-width", parseFloat(strokeWidth))
+        if (parseFloat(top)) {
             const shapeTop = shape.cloneNode()
             svg.appendChild(shapeTop)
             shapeTop.setAttribute("transform", `translate(${150 - shapeTop.getBBox().width/2} ${textBox.y - shapeTop.getBBox().height * 2})`)      
         }
-        if (logoData.textDecorationWavy.value.bottom) {
+        if (parseFloat(bottom)) {
             const shapeBottom = shape.cloneNode()
             svg.appendChild(shapeBottom)
             shapeBottom.setAttribute("transform", `translate(${150 - shapeBottom.getBBox().width/2} ${textBox.y + textBox.height + shapeBottom.getBBox().height * 2})`)      
         }
     }
-    if (logoData?.boxAround) {
+    if (logoData.shapeName = "boxAround") {
+        return
         const box = boxAround(textBox, logoData.boxAround.value.offset + logoData.boxAround.value.strokeWidth/2)
         svg.insertBefore(box, text)
         box.setAttribute("fill", logoData.boxAround.value.fill ? logoData.boxAround.value.fill : "transparent" )

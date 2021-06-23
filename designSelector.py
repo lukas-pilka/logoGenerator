@@ -1,6 +1,7 @@
 import random
 from flask import request, url_for
 from connector import cloudSqlCnx
+import numpy
 
 # Expanding data for Machine Learning / Each attribute value has its own index
 def expandData(fitData,maxValues):
@@ -75,13 +76,13 @@ def predictFitness(guessData):
     maxValues = getMaxValues(cnx)
     mlAttributes, mlFitness = getMlData(cnx, maxValues)
     from sklearn.neighbors import KNeighborsRegressor
-    regressor = KNeighborsRegressor(n_neighbors = 100, weights = "distance")
+    regressor = KNeighborsRegressor(n_neighbors = 10, weights = "distance")
     regressor.fit(mlAttributes, mlFitness)
-    predictions = []
-    for guess in guessData:
-        prediction = regressor.predict(guess)
-        predictions.append(prediction)
-    return predictions
+
+    # numpy reshaping is necessary because it is a single guess prediction
+    npGuessData = numpy.array([guessData]).reshape(1, -1)
+    prediction = regressor.predict(npGuessData)
+    return prediction
 
 
 def getFontFamily(cnx):
@@ -110,6 +111,25 @@ def getPrimaryColor(cnx):
         rndPrimaryColor = allPrimaryColors[random.randint(0, len(allPrimaryColors) - 1)][1]
     return rndPrimaryColorId, rndPrimaryColor
 
+
+def getTextTransform(cnx):
+    with cnx.cursor() as cursor:
+        cursor.execute('select * from text_transforms;')
+        allTextTransforms = cursor.fetchall()
+        rndTextTransformId = allTextTransforms[random.randint(0, len(allTextTransforms) - 1)][0]
+        rndTextTransform = allTextTransforms[random.randint(0, len(allTextTransforms) - 1)][1]
+    return rndTextTransformId, rndTextTransform
+
+
+def getShape(cnx):
+    with cnx.cursor() as cursor:
+        cursor.execute('select * from shapes;')
+        allShapes = cursor.fetchall()
+        rndShapeId = allShapes[random.randint(0, len(allShapes) - 1)][0]
+        rndShape = allShapes[random.randint(0, len(allShapes) - 1)][1]
+    return rndShapeId, rndShape
+
+
 def writeLogoView(cnx,fontFamilyId,fontWeightId,primaryColorId,ipAddress,requestTime):
     # Write logo view into logo_views table
     with cnx.cursor() as cursor:
@@ -120,12 +140,21 @@ def writeLogoView(cnx,fontFamilyId,fontWeightId,primaryColorId,ipAddress,request
     cnx.commit()
 
 
-def getLogos(cnx,brandName,brandArchetypeId,brandFieldId,logosCount=3):
+def getLogos(cnx, brandName, brandArchetypeId, brandFieldId, logosCount=3):
     logos = []
     for logo in range(logosCount):
         fontFamilyId, fontFamily = getFontFamily(cnx)
         fontWeightId, fontWeight = getFontWeight(cnx)
+        textTransformId, textTransform = getTextTransform(cnx)
         primaryColorId, primaryColor = getPrimaryColor(cnx)
+        shapeId, shape = getShape(cnx)
+
+        # Preparing data for fitness prediction
+        maxValues = getMaxValues(cnx)
+        fitData = [brandArchetypeId, brandFieldId, fontFamilyId, fontWeightId, primaryColorId]
+        guessData = expandData(fitData, maxValues)
+        fitnessPrediction = predictFitness(guessData)
+
         # You can add attributes here
         voteUrl = url_for('get_logo_results',
                           brandName=brandName,
@@ -141,6 +170,11 @@ def getLogos(cnx,brandName,brandArchetypeId,brandFieldId,logosCount=3):
                           "Font family": fontFamily,
                           "Font family id": fontFamilyId,
                           "Font weight": fontWeight,
-                          "Font weight id": fontWeightId,} # You can add attributes here
+                          "Font weight id": fontWeightId,
+                          "Text transform": textTransform,
+                          "Text transform id": textTransformId,
+                          "Shape": shape,
+                          "Shape id": shapeId,
+                          "Fitness prediction": float(fitnessPrediction),}  # You can add attributes here
         logos.append(logoAttributes)
     return logos

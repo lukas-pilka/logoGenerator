@@ -28,13 +28,15 @@
 {% endblock %}
 {% block end_scripts %}
     <script>
-        const logos = {{logos | tojson}}
-        const logoWrappers = document.getElementsByClassName(".logo")
+        const logos = {{ logos | tojson }}
+        const logoWrappers = document.getElementsByClassName("logo")
         logos.forEach((logo, index) => {
-            // fetch(`/svg/${logo["Font family"]}/${logo["Brand name"]}`)
             fetch(`/svg/Oswald/Oswald-Regular/${logo["Brand name"]}`)
             .then(response => response.json())
             .then(data => {
+
+                // [logo.shapeName, logo.args] = logo["Shape"].split("_")
+                [logo.shapeName, ...logo.args] = "textDecoration_10_10_3_1_1".split("_")
                 const path = document.createElementNS(svgNS, "path")
                 path.setAttribute("d", data.svg)
                 logo.svg = path
