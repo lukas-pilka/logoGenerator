@@ -1,8 +1,41 @@
 import random
-from flask import request, url_for
+from flask import url_for
 from connector import cloudSqlCnx
 import numpy
 import config
+
+def writeLogoView(cnx,brandName, brandArchetypeId, brandFieldId, fontFamilyId, fontWeightId, primaryColorId, ipAddress, requestTime):
+    # Write logo view into logo_views table
+    with cnx.cursor() as cursor:
+        # Create a new record
+        sql = "INSERT INTO `logo_views` (`brand_name`,`brand_archetype_id`,`brand_field_id`,`font_family_id`, `font_weight_id`, `primary_color_id`, `user_ip`,`created`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+        cursor.execute(sql, (brandName,
+                             brandArchetypeId,
+                             brandFieldId,
+                             fontFamilyId,
+                             fontWeightId,
+                             primaryColorId,
+                             ipAddress,
+                             requestTime))
+    # connection is not autocommit by default. So you must commit to save your changes.
+    cnx.commit()
+
+
+def writeLogoVote(cnx,brandName, brandArchetypeId, brandFieldId, fontFamilyId, fontWeightId, primaryColorId, ipAddress, requestTime):
+    # Write logo vote into logo_votes table
+    with cnx.cursor() as cursor:
+        # Create a new record
+        sql = "INSERT INTO `logo_votes` (`brand_name`,`brand_archetype_id`,`brand_field_id`,`font_family_id`, `font_weight_id`, `primary_color_id`, `user_ip`,`created`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+        cursor.execute(sql, (brandName,
+                             brandArchetypeId,
+                             brandFieldId,
+                             fontFamilyId,
+                             fontWeightId,
+                             primaryColorId,
+                             ipAddress,
+                             requestTime))
+    # connection is not autocommit by default. So you must commit to save your changes.
+    cnx.commit()
 
 # Expanding data for Machine Learning / Each attribute value has its own index
 def expandData(fitData,maxValues):

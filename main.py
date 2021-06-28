@@ -2,16 +2,14 @@ from fontTools.ttLib import TTFont
 from fontTools.pens.svgPathPen import SVGPathPen
 from fontTools.pens.transformPen import TransformPen
 from fontTools.pens.recordingPen import RecordingPen
-from flask import Flask, render_template, redirect, request, url_for, json, jsonify
-from flask_sqlalchemy import SQLAlchemy
-from flask_wtf.csrf import CSRFProtect, CSRFError
+from flask import Flask, render_template, redirect, request
+from flask_wtf.csrf import CSRFProtect
 from forms import brandProfile
 from designSelector import *
 from datetime import datetime
 from connector import cloudSqlCnx
 from pathlib import Path
 from flask import Flask
-from flaskext.mysql import MySQL
 from random import randint
 
 
@@ -22,41 +20,6 @@ app = Flask(__name__)
 app.config["SECRET_KEY"] = "blue_" + "-".join([str(randint(0, 64)) for i in range(64)]) + "_ghost"
 csrf = CSRFProtect(app)
 
-
-
-
-def writeLogoView(cnx,brandName, brandArchetypeId, brandFieldId, fontFamilyId, fontWeightId, primaryColorId, ipAddress, requestTime):
-    # Write logo view into logo_views table
-    with cnx.cursor() as cursor:
-        # Create a new record
-        sql = "INSERT INTO `logo_views` (`brand_name`,`brand_archetype_id`,`brand_field_id`,`font_family_id`, `font_weight_id`, `primary_color_id`, `user_ip`,`created`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
-        cursor.execute(sql, (brandName,
-                             brandArchetypeId,
-                             brandFieldId,
-                             fontFamilyId,
-                             fontWeightId,
-                             primaryColorId,
-                             ipAddress,
-                             requestTime))
-    # connection is not autocommit by default. So you must commit to save your changes.
-    cnx.commit()
-
-
-def writeLogoVote(cnx,brandName, brandArchetypeId, brandFieldId, fontFamilyId, fontWeightId, primaryColorId, ipAddress, requestTime):
-    # Write logo vote into logo_votes table
-    with cnx.cursor() as cursor:
-        # Create a new record
-        sql = "INSERT INTO `logo_votes` (`brand_name`,`brand_archetype_id`,`brand_field_id`,`font_family_id`, `font_weight_id`, `primary_color_id`, `user_ip`,`created`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
-        cursor.execute(sql, (brandName,
-                             brandArchetypeId,
-                             brandFieldId,
-                             fontFamilyId,
-                             fontWeightId,
-                             primaryColorId,
-                             ipAddress,
-                             requestTime))
-    # connection is not autocommit by default. So you must commit to save your changes.
-    cnx.commit()
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
