@@ -6,7 +6,6 @@ function voterPass() {
 	document.cookie = "voterPass=True;" + expires; // Creating cookie when closing window
 }
 
-
 const submitLogoGeneratorForm = (el) => {
     el.preventDefault()
     fetch("/get_logo_results", {
