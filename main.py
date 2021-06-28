@@ -15,6 +15,7 @@ from flaskext.mysql import MySQL
 from random import randint
 
 
+
 base = Path(__file__).parent
 
 app = Flask(__name__)

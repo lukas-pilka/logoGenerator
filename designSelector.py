@@ -2,6 +2,7 @@ import random
 from flask import request, url_for
 from connector import cloudSqlCnx
 import numpy
+import config
 
 # Expanding data for Machine Learning / Each attribute value has its own index
 def expandData(fitData,maxValues):
@@ -14,16 +15,18 @@ def expandData(fitData,maxValues):
                 fitDataExpanded.append(0)
     return fitDataExpanded
 
-def getMaxValues(cnx):
-    with cnx.cursor() as cursor:
 
-        # Asking for maximum id values
-        cursor.execute('''
-                SELECT MAX(brand_archetype_id), MAX(brand_field_id), MAX(font_family_id), MAX(font_weight_id), MAX(primary_color_id)
-                FROM logo_views
-                ''')
-        maxValues = list(cursor.fetchall()[0])
-        return maxValues
+def getMaxValues(cnx,colNames):
+    maxValues = []
+    for colName in colNames:
+        with cnx.cursor() as cursor:
+            # Asking for maximum id values
+            sql = "SELECT MAX({value}) FROM logo_views".format(value=colName)
+            cursor.execute(sql)
+            maxValue = cursor.fetchall()[0][0]
+            maxValues.append(maxValue)
+    return maxValues
+
 
 def getMlData(cnx, maxValues):
     with cnx.cursor() as cursor:
@@ -74,7 +77,7 @@ def getMlData(cnx, maxValues):
 
 def predictFitness(guessData):
     cnx = cloudSqlCnx() # Open connection
-    maxValues = getMaxValues(cnx)
+    maxValues = getMaxValues(cnx,config.colsForPrediction)
     mlAttributes, mlFitness = getMlData(cnx, maxValues)
     from sklearn.neighbors import KNeighborsRegressor
     regressor = KNeighborsRegressor(n_neighbors = 10, weights = "distance")
@@ -109,7 +112,7 @@ def getLogos(cnx, brandName, brandArchetypeId, brandFieldId, logosCount=3):
         shapeId, shape = getDesignForm(cnx,'shapes')
 
         # Preparing data for fitness prediction
-        maxValues = getMaxValues(cnx)
+        maxValues = getMaxValues(cnx,config.colsForPrediction)
         fitData = [brandArchetypeId, brandFieldId, fontFamilyId, fontWeightId, primaryColorId]
         guessData = expandData(fitData, maxValues)
         fitnessPrediction = predictFitness(guessData)

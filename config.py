@@ -1,0 +1,1 @@
+colsForPrediction = ['brand_archetype_id','brand_field_id','font_family_id','font_weight_id','primary_color_id']
