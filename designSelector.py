@@ -87,69 +87,26 @@ def predictFitness(guessData):
     return prediction
 
 
-def getFontFamily(cnx):
+# receives mysql table name as parameter and queries a random value from it
+def getDesignForm(cnx, tableName):
     with cnx.cursor() as cursor:
-        cursor.execute('select * from font_families;')
-        allFonts = cursor.fetchall()
-        rndFontFamilyId = allFonts[random.randint(0, len(allFonts) - 1)][0]
-        rndFontFamily = allFonts[random.randint(0, len(allFonts) - 1)][1]
-    return rndFontFamilyId, rndFontFamily
-
-
-def getFontWeight(cnx):
-    with cnx.cursor() as cursor:
-        cursor.execute('select * from font_weights;')
-        allFontWeights = cursor.fetchall()
-        rndFontWeightId = allFontWeights[random.randint(0, len(allFontWeights) - 1)][0]
-        rndFontWeight = allFontWeights[random.randint(0, len(allFontWeights) - 1)][1]
-    return rndFontWeightId, rndFontWeight
-
-
-def getPrimaryColor(cnx):
-    with cnx.cursor() as cursor:
-        cursor.execute('select * from primary_colors;')
-        allPrimaryColors = cursor.fetchall()
-        rndPrimaryColorId = allPrimaryColors[random.randint(0, len(allPrimaryColors) - 1)][0]
-        rndPrimaryColor = allPrimaryColors[random.randint(0, len(allPrimaryColors) - 1)][1]
-    return rndPrimaryColorId, rndPrimaryColor
-
-
-def getTextTransform(cnx):
-    with cnx.cursor() as cursor:
-        cursor.execute('select * from text_transforms;')
-        allTextTransforms = cursor.fetchall()
-        rndTextTransformId = allTextTransforms[random.randint(0, len(allTextTransforms) - 1)][0]
-        rndTextTransform = allTextTransforms[random.randint(0, len(allTextTransforms) - 1)][1]
-    return rndTextTransformId, rndTextTransform
-
-
-def getShape(cnx):
-    with cnx.cursor() as cursor:
-        cursor.execute('select * from shapes;')
-        allShapes = cursor.fetchall()
-        rndShapeId = allShapes[random.randint(0, len(allShapes) - 1)][0]
-        rndShape = allShapes[random.randint(0, len(allShapes) - 1)][1]
-    return rndShapeId, rndShape
-
-
-def writeLogoView(cnx,fontFamilyId,fontWeightId,primaryColorId,ipAddress,requestTime):
-    # Write logo view into logo_views table
-    with cnx.cursor() as cursor:
-        # Create a new record
-        sql = "INSERT INTO `logo_views` (`font_family_id`, `font_weight_id`, `primary_color_id`, `user_ip`,`created`) VALUES (%s, %s, %s, %s, %s)"
-        cursor.execute(sql, (fontFamilyId, fontWeightId, primaryColorId, ipAddress, requestTime))
-    # connection is not autocommit by default. So you must commit to save your changes.
-    cnx.commit()
+        sql = "select * from {tableName}".format(tableName=tableName)
+        cursor.execute(sql)
+        allValues = cursor.fetchall()
+        rndValue = allValues[random.randint(0, len(allValues) - 1)]
+        rndValueId = rndValue[0]
+        rndValueName = rndValue[1]
+    return rndValueId, rndValueName
 
 
 def getLogos(cnx, brandName, brandArchetypeId, brandFieldId, logosCount=3):
     logos = []
     for logo in range(logosCount):
-        fontFamilyId, fontFamily = getFontFamily(cnx)
-        fontWeightId, fontWeight = getFontWeight(cnx)
-        textTransformId, textTransform = getTextTransform(cnx)
-        primaryColorId, primaryColor = getPrimaryColor(cnx)
-        shapeId, shape = getShape(cnx)
+        fontFamilyId, fontFamily = getDesignForm(cnx,'font_families')
+        fontWeightId, fontWeight = getDesignForm(cnx,'font_weights')
+        textTransformId, textTransform = getDesignForm(cnx,'text_transforms')
+        primaryColorId, primaryColor = getDesignForm(cnx,'primary_colors')
+        shapeId, shape = getDesignForm(cnx,'shapes')
 
         # Preparing data for fitness prediction
         maxValues = getMaxValues(cnx)
@@ -157,7 +114,7 @@ def getLogos(cnx, brandName, brandArchetypeId, brandFieldId, logosCount=3):
         guessData = expandData(fitData, maxValues)
         fitnessPrediction = predictFitness(guessData)
 
-        # You can add attributes here
+        # Preparing logo attributes for generating
         voteUrl = url_for('get_logo_results',
                           brandName=brandName,
                           brandArchetype=brandArchetypeId,
@@ -179,4 +136,7 @@ def getLogos(cnx, brandName, brandArchetypeId, brandFieldId, logosCount=3):
                           "Shape id": shapeId,
                           "Fitness prediction": float(fitnessPrediction),}  # You can add attributes here
         logos.append(logoAttributes)
+
     return logos
+
+
