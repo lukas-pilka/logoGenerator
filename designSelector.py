@@ -2,54 +2,51 @@ import random
 from flask import url_for
 from connector import cloudSqlCnx
 import numpy
+from connector import cloudSqlCnx
 import config
+from datetime import datetime
 
-def writeLogoView(cnx,brandName, brandArchetypeId, brandFieldId, fontFamilyId, fontWeightId, primaryColorId, ipAddress, requestTime):
+cnx = cloudSqlCnx() # Open connection
+
+def writeLogoView(brandName, brandArchetypeId, brandFieldId, fontFamilyId, fontWeightNum, textTransformId, primaryColorId, shapeId, ipAddress, requestTime):
     # Write logo view into logo_views table
     with cnx.cursor() as cursor:
         # Create a new record
-        sql = "INSERT INTO `logo_views` (`brand_name`,`brand_archetype_id`,`brand_field_id`,`font_family_id`, `font_weight_id`, `primary_color_id`, `user_ip`,`created`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+        sql = "INSERT INTO `logo_views` (`brand_name`,`brand_archetype_id`,`brand_field_id`,`font_family_id`, `font_weight_num`, `text_transform_id`, `primary_color_id`, `shape_id`, `user_ip`,`created`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
         cursor.execute(sql, (brandName,
                              brandArchetypeId,
                              brandFieldId,
                              fontFamilyId,
-                             fontWeightId,
+                             fontWeightNum,  # Not Id because weight value is countable (integer)
+                             textTransformId,
                              primaryColorId,
+                             shapeId,
                              ipAddress,
                              requestTime))
     # connection is not autocommit by default. So you must commit to save your changes.
     cnx.commit()
 
 
-def writeLogoVote(cnx,brandName, brandArchetypeId, brandFieldId, fontFamilyId, fontWeightId, primaryColorId, ipAddress, requestTime):
-    # Write logo vote into logo_votes table
+def writeLogoVote(brandName, brandArchetypeId, brandFieldId, fontFamilyId, fontWeightNum, textTransformId, primaryColorId, shapeId, ipAddress, requestTime):
+    # Write logo vote into logo_views table
     with cnx.cursor() as cursor:
         # Create a new record
-        sql = "INSERT INTO `logo_votes` (`brand_name`,`brand_archetype_id`,`brand_field_id`,`font_family_id`, `font_weight_id`, `primary_color_id`, `user_ip`,`created`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+        sql = "INSERT INTO `logo_votes` (`brand_name`,`brand_archetype_id`,`brand_field_id`,`font_family_id`, `font_weight_num`, `text_transform_id`, `primary_color_id`, `shape_id`, `user_ip`,`created`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
         cursor.execute(sql, (brandName,
                              brandArchetypeId,
                              brandFieldId,
                              fontFamilyId,
-                             fontWeightId,
+                             fontWeightNum,  # Not Id because weight value is countable (integer)
+                             textTransformId,
                              primaryColorId,
+                             shapeId,
                              ipAddress,
                              requestTime))
     # connection is not autocommit by default. So you must commit to save your changes.
     cnx.commit()
 
-# Expanding data for Machine Learning / Each attribute value has its own index
-def expandData(fitData,maxValues):
-    fitDataExpanded = []
-    for i in range(len(maxValues)):
-        for step in range(maxValues[i]):
-            if step == fitData[i]:
-                fitDataExpanded.append(1)
-            else:
-                fitDataExpanded.append(0)
-    return fitDataExpanded
 
-
-def getMaxValues(cnx,colNames):
+def getMaxValues(colNames):
     maxValues = []
     for colName in colNames:
         with cnx.cursor() as cursor:
@@ -61,23 +58,38 @@ def getMaxValues(cnx,colNames):
     return maxValues
 
 
-def getMlData(cnx, maxValues):
+# Expanding data for Machine Learning / Each attribute value has its own index
+def expandData(measurableValues, unmeasurableIds, unmeasurableMaxIds):
+    fitDataExpanded = []
+    # just add measurable parameters to the list
+    fitDataExpanded.extend(measurableValues)
+    # for unmeasurable attributes, a boolean parameter must be created for each possible id and set to 1 or 0
+    for i in range(len(unmeasurableMaxIds)):
+        for step in range(unmeasurableMaxIds[i]):
+            if step == unmeasurableIds[i]:
+                fitDataExpanded.append(1)
+            else:
+                fitDataExpanded.append(0)
+    return fitDataExpanded
+
+
+def getMlData(unmeasurableMaxIds):
     with cnx.cursor() as cursor:
 
         # Asking for grouped logo views
         cursor.execute('''
-                SELECT COUNT(id), brand_archetype_id, brand_field_id, font_family_id, font_weight_id, primary_color_id
+                SELECT COUNT(id), font_weight_num, brand_archetype_id, brand_field_id, font_family_id, primary_color_id, shape_id, text_transform_id
                 FROM logo_views
-                GROUP BY brand_archetype_id, brand_field_id, font_family_id, font_weight_id, primary_color_id
+                GROUP BY font_weight_num, brand_archetype_id, brand_field_id, font_family_id, primary_color_id, shape_id, text_transform_id
                 ORDER BY COUNT(id) DESC;
                 ''')
         logoViewsStats = cursor.fetchall()
 
         # Asking for grouped logo votes
         cursor.execute('''
-                SELECT COUNT(id), brand_archetype_id, brand_field_id, font_family_id, font_weight_id, primary_color_id
+                SELECT COUNT(id), font_weight_num, brand_archetype_id, brand_field_id, font_family_id, primary_color_id, shape_id, text_transform_id
                 FROM logo_votes
-                GROUP BY brand_archetype_id, brand_field_id, font_family_id, font_weight_id, primary_color_id
+                GROUP BY font_weight_num, brand_archetype_id, brand_field_id, font_family_id, primary_color_id, shape_id, text_transform_id
                 ORDER BY COUNT(id) DESC;
                 ''')
         logoVotesStats = cursor.fetchall()
@@ -88,12 +100,12 @@ def getMlData(cnx, maxValues):
         for viewGroup in range(len(logoViewsStats)):
             viewGroupLikes = 0
             viewsCount = logoViewsStats[viewGroup][0]
-            viewsAttributes = logoViewsStats[viewGroup][1:]
+            viewsAttributes = logoViewsStats[viewGroup][1:] # crop after count
 
             #Counting likes number for every viewGroup
             for voteGroup in range(len(logoVotesStats)):
                 votesCount = logoVotesStats[voteGroup][0]
-                votesAttributes = logoVotesStats[voteGroup][1:]
+                votesAttributes = logoVotesStats[voteGroup][1:] # crop after count
                 if viewsAttributes == votesAttributes:
                     viewGroupLikes += votesCount
 
@@ -102,77 +114,127 @@ def getMlData(cnx, maxValues):
             mlFitness.append(fitness)
 
             # Expanding data for Machine Learning / Each attribute value has its own index
-            expandedData = expandData(list(viewsAttributes), maxValues)
+            measurableValues = [logoViewsStats[viewGroup][1]] # fontWeight
+            unmeasurableIds = logoViewsStats[viewGroup][2:]
+            expandedData = expandData(measurableValues, unmeasurableIds, unmeasurableMaxIds)
             mlAttributes.append(expandedData)
 
         return mlAttributes, mlFitness
 
 
 def predictFitness(guessData):
-    cnx = cloudSqlCnx() # Open connection
-    maxValues = getMaxValues(cnx,config.colsForPrediction)
-    mlAttributes, mlFitness = getMlData(cnx, maxValues)
     from sklearn.neighbors import KNeighborsRegressor
+    maxValues = getMaxValues(config.unmeasurableRankingCols)
+    modelData, modelFitness = getMlData(maxValues)
+
+    # Data normalization
+    from sklearn import preprocessing
+    modelDataNormalized = preprocessing.minmax_scale(modelData)
+    guessDataNormalized = preprocessing.minmax_scale(guessData)
+
+    # Preparing regressor
     regressor = KNeighborsRegressor(n_neighbors = 10, weights = "distance")
-    regressor.fit(mlAttributes, mlFitness)
+    regressor.fit(modelDataNormalized, modelFitness)
 
-    # numpy reshaping is necessary because it is a single guess prediction
-    npGuessData = numpy.array(guessData).reshape(1, -1)
-    prediction = regressor.predict(npGuessData)[0]
-    prediction = prediction.item() #converting numpy float64 to python float
-    return prediction
-
-
-# receives mysql table name as parameter and queries a random value from it
-def getDesignForm(cnx, tableName):
-    with cnx.cursor() as cursor:
-        sql = "select * from {tableName}".format(tableName=tableName)
-        cursor.execute(sql)
-        allValues = cursor.fetchall()
-        rndValue = allValues[random.randint(0, len(allValues) - 1)]
-        rndValueId = rndValue[0]
-        rndValueName = rndValue[1]
-    return rndValueId, rndValueName
+    # asking for prediction for each logo, 1 logo == 1 guessData
+    predictions = []
+    for guessData in guessDataNormalized:
+        npGuessData = numpy.array(guessData).reshape(1, -1) #converting numpy float64 to python float
+        prediction = regressor.predict(npGuessData)[0]
+        prediction = prediction.item()
+        predictions.append(prediction)
+    return predictions
 
 
-def getLogos(cnx, brandName, brandArchetypeId, brandFieldId, logosCount=3):
+def generateLogos(brandName, brandArchetype, businessCategories, countOfLogos, ipAddress, requestTime):
+    startTime = datetime.now()
+
+    # Loading all attributes from all tables in mysql
+    allAttributes = {}
+    allTables = config.measurableGraphicTbls + config.unmeasurableGraphicTbls
+    for tableName in allTables:
+        with cnx.cursor() as cursor:
+            sql = "select * from {tableName}".format(tableName=tableName)
+            cursor.execute(sql)
+            allValues = cursor.fetchall()
+            allAttributes[tableName] = allValues
+
+    # Generating logos with selected brand parameters and random combination of attributes
     logos = []
-    for logo in range(logosCount):
-        fontFamilyId, fontFamily = getDesignForm(cnx,'font_families')
-        fontWeightId, fontWeight = getDesignForm(cnx,'font_weights')
-        textTransformId, textTransform = getDesignForm(cnx,'text_transforms')
-        primaryColorId, primaryColor = getDesignForm(cnx,'primary_colors')
-        shapeId, shape = getDesignForm(cnx,'shapes')
+    for logo in range(config.logoStorageSize):
+        logo = {}
+        logo['brand_name'] = brandName
+        logo['brand_archetypes'] = brandArchetype
+        logo['business_categories'] = businessCategories
+        for attribute in allAttributes:
+            rndValue = allAttributes[attribute][random.randint(0, len(allAttributes[attribute])-1)]
+            logo[attribute] = rndValue
+        logos.append(logo)
 
-        # Preparing data for fitness prediction
-        maxValues = getMaxValues(cnx,config.colsForPrediction)
-        fitData = [brandArchetypeId, brandFieldId, fontFamilyId, fontWeightId, primaryColorId]
-        guessData = expandData(fitData, maxValues)
-        fitnessPrediction = predictFitness(guessData)
+    # Adding vote url
+    for logo in logos:
+        logo['vote_url'] = url_for('get_logo_results',
+                                   brand_name=logo['brand_name'],
+                                   brand_archetypes_id=logo['brand_archetypes'][0],
+                                   brand_archetypes=logo['brand_archetypes'][1],
+                                   business_categories_id=logo['business_categories'][0],
+                                   business_categories=logo['business_categories'][1],
+                                   font_weights_id=logo['font_weights'][0],
+                                   font_weights=logo['font_weights'][1],
+                                   font_families_id=logo['font_families'][0],
+                                   font_families=logo['font_families'][1],
+                                   primary_colors_id=logo['primary_colors'][0],
+                                   primary_colors=logo['primary_colors'][1],
+                                   shapes_id=logo['shapes'][0],
+                                   shapes=logo['shapes'][1],
+                                   text_transforms_id=logo['text_transforms'][0],
+                                   text_transforms=logo['text_transforms'][1],
+                                   )
 
-        # Preparing logo attributes for generating
-        voteUrl = url_for('get_logo_results',
-                          brandName=brandName,
-                          brandArchetype=brandArchetypeId,
-                          brandField=brandFieldId,
-                          fontFamily=fontFamilyId,
-                          fontWeight=fontWeightId,
-                          primaryColor=primaryColorId)
-        logoAttributes = {"Vote url": voteUrl,
-                          "Brand name": brandName,
-                          "Primary color": primaryColor,
-                          "Primary color id": primaryColorId,
-                          "Font family": fontFamily,
-                          "Font family id": fontFamilyId,
-                          "Font weight": fontWeight,
-                          "Font weight id": fontWeightId,
-                          "Text transform": textTransform,
-                          "Text transform id": textTransformId,
-                          "Shape": shape,
-                          "Shape id": shapeId,
-                          "Fitness prediction": float(fitnessPrediction),}  # You can add attributes here
-        logos.append(logoAttributes)
+    # Preparing data for fitness prediction
+    predictionInputs = []
+    unmeasurableMaxIds = getMaxValues(config.unmeasurableRankingCols)
+    for logo in logos:
+        measurableValues = []
+        unmeasurableIds = []
+        for attribute in logo:
+            # checking if attribute is measurable and sorting it into suitable list
+            if type(logo[attribute][1]) == int:
+                measurableValues.append(logo[attribute][1])
+            else:
+                unmeasurableIds.append(logo[attribute][0])
+        predictionInput = expandData(measurableValues, unmeasurableIds, unmeasurableMaxIds)
+        predictionInputs.append(predictionInput)
 
-    return logos
+    # Calculating fitness prediction
+    fitnessPredictions = predictFitness(predictionInputs)
+    for i in range(len(logos)):
+        logos[i]['fitness'] = fitnessPredictions[i]
 
+    # Sorting by fitness
+    def takeFitness(logo):
+        return logo['fitness']
+    logos.sort(key=takeFitness, reverse=True)
+
+    # Selecting best logos (with highest fitness) from all logos
+    bestLogos = logos[:countOfLogos]
+
+    # Adds best logos views to database
+    for logo in bestLogos:
+        writeLogoView(brandName,
+                      logo['brand_archetypes'][0],
+                      logo['business_categories'][0],
+                      logo['font_families'][0],
+                      logo['font_weights'][1],
+                      logo['text_transforms'][0],
+                      logo['primary_colors'][0],
+                      logo['shapes'][0],
+                      ipAddress,
+                      requestTime)
+
+    # Printing request duration
+    requestDuration = datetime.now() - startTime
+    print('{logosTotal} logos were generated and {logosSelected} best ones were selected in {requestDuration}'.format(logosTotal=config.logoStorageSize, logosSelected=countOfLogos, requestDuration=requestDuration))
+
+    return bestLogos
 

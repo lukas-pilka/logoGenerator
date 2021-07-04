@@ -3,7 +3,7 @@ svgNS = "http://www.w3.org/2000/svg"
 const buildLogo = (wrapper, logoData) => {
     console.log(wrapper)
     const svg = document.createElementNS(svgNS, "svg")
-    svg.style.background = logoData["Primary color"]
+    svg.style.background = logoData["primary_colors"][1]
     svg.setAttribute("height", 300)
     svg.setAttribute("width", 300)
     wrapper.appendChild(svg)
@@ -21,7 +21,7 @@ const buildLogo = (wrapper, logoData) => {
         let [fill, strokeLineJoin, strokeWidth, adjustToContent, steps, type] = logoData.args
         
         if (parseInt(fill)) {
-            text.setAttribute("fill", logoData["Primary color"])
+            text.setAttribute("fill", logoData["primary_colors"][1])
         }
         
         const diagonal = elementDiagonal(textBox)

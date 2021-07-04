@@ -17,6 +17,7 @@
             <a href="{{ logo['Vote url'] }}" onclick="voterPass();">
                 <span class="logo"></span>
                 <small>{{logo}}</small>
+                <small>{{logo["shapes"][1]}}</small>
             </a>
         {% endfor %}
     </div>
@@ -26,10 +27,10 @@
         const logos = {{ logos | tojson }}
         const logoWrappers = document.getElementsByClassName("logo")
         logos.forEach((logo, index) => {
-            fetch(`/svg/Oswald/Oswald-Regular/${logo["Brand name"]}`)
+            fetch(`/svg/Oswald/Oswald-Regular/${logo["brand_name"]}`)
             .then(response => response.json())
             .then(data => {
-                [logo.shapeName, ...logo.args] = logo["Shape"].split("_")
+                [logo.shapeName, ...logo.args] = logo["shapes"][1].split("_")
                 const path = document.createElementNS(svgNS, "path")
                 path.setAttribute("d", data.svg)
                 logo.svg = path

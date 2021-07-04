@@ -25,50 +25,60 @@ csrf = CSRFProtect(app)
 def index():
     form = brandProfile()
     if form.validate_on_submit():
-        brandName = form.brandName.data
-        brandArchetype = form.brandArchetype.data
-        brandField = form.brandField.data
-        return redirect(url_for("get_logo_results", brandName=brandName, brandArchetype=brandArchetype, brandField=brandField))
+        brand_name = form.brandName.data
+        brand_archetypes_id = form.brandArchetype.data
+        brand_archetypes = dict(form.brandArchetype.choices)[int(brand_archetypes_id)]
+        business_categories_id = form.brandField.data
+        business_categories = dict(form.brandField.choices)[int(business_categories_id)]
+        return redirect(url_for("get_logo_results", brand_name=brand_name, brand_archetypes_id=brand_archetypes_id,
+                                brand_archetypes=brand_archetypes, business_categories_id=business_categories_id,
+                                business_categories=business_categories))
     return render_template('index.html', form=form)
 
 @app.route("/get_logo_results", methods=["GET","POST"])
 def get_logo_results():
+
+    print("""
+============================
+NEW REQUEST FOR LOGO RESULTS
+============================
+    """)
 
     ipAddress = request.remote_addr
     requestTime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     receivedArguments = request.args.to_dict(flat=True)
 
     # Check if it receives arguments and if so it returns logo results
-    if {'brandName', 'brandArchetype', 'brandField'} <= receivedArguments.keys():
-        brandName = receivedArguments['brandName']
-        brandArchetype = int(receivedArguments['brandArchetype'])
-        brandField = int(receivedArguments['brandField'])
+    if {'brand_name','brand_archetypes_id','brand_archetypes', 'business_categories_id','business_categories'} <= receivedArguments.keys():
+        brandName = receivedArguments['brand_name']
+        brandArchetype = (int(receivedArguments['brand_archetypes_id']),receivedArguments['brand_archetypes'])
+        businessCategories = (int(receivedArguments['business_categories_id']), receivedArguments['business_categories'])
         voterPass = request.cookies.get('voterPass') # voterPass allows to submit vote
         cnx = cloudSqlCnx() # Open connection
-        logos = getLogos(cnx, brandName, brandArchetype, brandField, 3) # gets a list of logos with their parameters
+        logos = generateLogos(brandName, brandArchetype, businessCategories, 5, ipAddress, requestTime)
 
-        # Adds logo views to database
+        # Printing results
+        print("""
+==============
+SELECTED LOGOS
+==============
+            """)
         for logo in logos:
-            writeLogoView(cnx,
-                          brandName,
-                          brandArchetype,
-                          brandField,
-                          logo['Font family id'],
-                          logo['Font weight id'],
-                          logo['Primary color id'],
-                          ipAddress,
-                          requestTime)
+            print('-------------')
+            for attribute in logo:
+                print(attribute + ': ' + str(logo[attribute]))
 
         # Check if it has voterPass
         if voterPass:
             print('Voting for: ' + str(receivedArguments))
-            writeLogoVote(cnx,
-                          brandName,
-                          brandArchetype,
-                          brandField,
-                          receivedArguments['fontFamily'],
-                          receivedArguments['fontWeight'],
-                          receivedArguments['primaryColor'],
+            writeLogoVote(brandName,
+                          logo['brand_archetypes'][0],
+                          logo['business_categories'][0],
+                          logo['font_families'][0],
+                          logo['font_weights'][1],
+                          logo['text_transforms'][0],
+                          logo['primary_colors'][0],
+                          logo['shapes'][0],
                           ipAddress,
                           requestTime)
         else:
@@ -77,12 +87,10 @@ def get_logo_results():
         # Close connection
         cnx.close()
         return render_template("logoResults.html", logos=logos), 200
-    return redirect(url_for("index"))
+
 
 @app.route("/run_ml", methods=["GET"])
 def runMachineLearning():
-    cnx = cloudSqlCnx()  # Open connection
-    print(getMlData(cnx))
     return('Done')
 
 @app.route("/view_logos", methods=["GET"])
