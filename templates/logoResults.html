@@ -14,10 +14,17 @@
     <h1>Logo Results</h1>
     <div class="logos">
         {% for logo in logos %}
-            <a href="{{ logo['Vote url'] }}" onclick="voterPass();">
+            {% if logo['previous_logo'] is defined %}
+                <a href="{{ logo['vote_url'] }}" onclick="voterPass();" style="background-color: yellow;">
+            {% else %}
+                <a href="{{ logo['vote_url'] }}" onclick="voterPass();">
+            {% endif %}
                 <span class="logo"></span>
-                <small>{{logo}}</small>
-                <small>{{logo["shapes"][1]}}</small>
+                <div style="font-size: 12px; max-width: 300px; overflow: hidden">
+                {% for attribute in logo %}
+                    <strong>{{ attribute }}</strong>:{{ logo[attribute] }}<br>
+                {% endfor %}
+                </div>
             </a>
         {% endfor %}
     </div>
@@ -37,5 +44,11 @@
                 buildLogo(logoWrappers[index], logo)
             })    
         })
+
+        let previousLogo = JSON.parse(getCookie('previousLogo'));
+        console.log(typeof (previousLogo));
+        console.log(previousLogo);
+        buildLogo(logoWrappers[index], previousLogo);
+
     </script>
 {% endblock %}

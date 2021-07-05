@@ -146,7 +146,7 @@ def predictFitness(guessData):
     return predictions
 
 
-def generateLogos(brandName, brandArchetype, businessCategories, countOfLogos, ipAddress, requestTime):
+def generateLogos(brandName, brandArchetype, businessCategories, countOfLogos, ipAddress, requestTime, previousLogo):
     startTime = datetime.now()
 
     # Loading all attributes from all tables in mysql
@@ -170,26 +170,6 @@ def generateLogos(brandName, brandArchetype, businessCategories, countOfLogos, i
             rndValue = allAttributes[attribute][random.randint(0, len(allAttributes[attribute])-1)]
             logo[attribute] = rndValue
         logos.append(logo)
-
-    # Adding vote url
-    for logo in logos:
-        logo['vote_url'] = url_for('get_logo_results',
-                                   brand_name=logo['brand_name'],
-                                   brand_archetypes_id=logo['brand_archetypes'][0],
-                                   brand_archetypes=logo['brand_archetypes'][1],
-                                   business_categories_id=logo['business_categories'][0],
-                                   business_categories=logo['business_categories'][1],
-                                   font_weights_id=logo['font_weights'][0],
-                                   font_weights=logo['font_weights'][1],
-                                   font_families_id=logo['font_families'][0],
-                                   font_families=logo['font_families'][1],
-                                   primary_colors_id=logo['primary_colors'][0],
-                                   primary_colors=logo['primary_colors'][1],
-                                   shapes_id=logo['shapes'][0],
-                                   shapes=logo['shapes'][1],
-                                   text_transforms_id=logo['text_transforms'][0],
-                                   text_transforms=logo['text_transforms'][1],
-                                   )
 
     # Preparing data for fitness prediction
     predictionInputs = []
@@ -218,6 +198,44 @@ def generateLogos(brandName, brandArchetype, businessCategories, countOfLogos, i
 
     # Selecting best logos (with highest fitness) from all logos
     bestLogos = logos[:countOfLogos]
+
+    # Placement of previous logo into bestLogos
+    # If it receives previous selected logo, it will replace one of the existing logos in bestLogos (depending on previousLogo order)
+    if previousLogo != None:
+        order = int(previousLogo['order'])
+        bestLogos[order]['brand_name'] = previousLogo['brand_name']
+        bestLogos[order]['brand_archetypes'] = (previousLogo['brand_archetypes_id'], previousLogo['brand_archetypes'])
+        bestLogos[order]['business_categories'] = (previousLogo['business_categories_id'], previousLogo['business_categories'])
+        bestLogos[order]['font_weights'] = (previousLogo['font_weights_id'], previousLogo['font_weights'])
+        bestLogos[order]['font_families'] = (previousLogo['font_families_id'], previousLogo['font_families'])
+        bestLogos[order]['primary_colors'] = (previousLogo['primary_colors_id'], previousLogo['primary_colors'])
+        bestLogos[order]['shapes'] = (previousLogo['shapes_id'], previousLogo['shapes'])
+        bestLogos[order]['text_transforms'] = (previousLogo['text_transforms_id'], previousLogo['text_transforms'])
+        bestLogos[order]['fitness'] = 1.0 # Because user selected this logo
+        bestLogos[order]['previous_logo'] = True  # adds information that it is previousLogo
+
+    # Adding vote url
+    order = 0
+    for logo in bestLogos:
+        logo['vote_url'] = url_for('get_logo_results',
+                                   brand_name=logo['brand_name'],
+                                   brand_archetypes_id=logo['brand_archetypes'][0],
+                                   brand_archetypes=logo['brand_archetypes'][1],
+                                   business_categories_id=logo['business_categories'][0],
+                                   business_categories=logo['business_categories'][1],
+                                   font_weights_id=logo['font_weights'][0],
+                                   font_weights=logo['font_weights'][1],
+                                   font_families_id=logo['font_families'][0],
+                                   font_families=logo['font_families'][1],
+                                   primary_colors_id=logo['primary_colors'][0],
+                                   primary_colors=logo['primary_colors'][1],
+                                   shapes_id=logo['shapes'][0],
+                                   shapes=logo['shapes'][1],
+                                   text_transforms_id=logo['text_transforms'][0],
+                                   text_transforms=logo['text_transforms'][1],
+                                   order=order, # Order in the list
+                                   )
+        order += 1
 
     # Adds best logos views to database
     for logo in bestLogos:

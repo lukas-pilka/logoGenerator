@@ -11,6 +11,7 @@ from connector import cloudSqlCnx
 from pathlib import Path
 from flask import Flask
 from random import randint
+from requests import get
 
 
 
@@ -44,49 +45,51 @@ NEW REQUEST FOR LOGO RESULTS
 ============================
     """)
 
-    ipAddress = request.remote_addr
+    ipAddress = get('https://api.ipify.org').text
     requestTime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     receivedArguments = request.args.to_dict(flat=True)
+    voterPass = request.cookies.get('voterPass')  # voterPass allows to submit vote
+    cnx = cloudSqlCnx()  # Open connection
 
-    # Check if it receives arguments and if so it returns logo results
-    if {'brand_name','brand_archetypes_id','brand_archetypes', 'business_categories_id','business_categories'} <= receivedArguments.keys():
+    # If it receives brand parameters in attributes it generates logos
+    if {'brand_name','brand_archetypes','business_categories'} <= receivedArguments.keys():
         brandName = receivedArguments['brand_name']
-        brandArchetype = (int(receivedArguments['brand_archetypes_id']),receivedArguments['brand_archetypes'])
+        brandArchetype = (int(receivedArguments['brand_archetypes_id']), receivedArguments['brand_archetypes'])
         businessCategories = (int(receivedArguments['business_categories_id']), receivedArguments['business_categories'])
-        voterPass = request.cookies.get('voterPass') # voterPass allows to submit vote
-        cnx = cloudSqlCnx() # Open connection
-        logos = generateLogos(brandName, brandArchetype, businessCategories, 5, ipAddress, requestTime)
 
-        # Printing results
-        print("""
-==============
-SELECTED LOGOS
-==============
-            """)
-        for logo in logos:
-            print('-------------')
-            for attribute in logo:
-                print(attribute + ': ' + str(logo[attribute]))
+        # If it receives previous logo parameters in attributes it ads them into previousLogo
+        if {'font_weights','font_families','primary_colors'} <= receivedArguments.keys():
+            # it ads them into previousLogo
+            previousLogo = receivedArguments
 
-        # Check if it has voterPass
-        if voterPass:
-            print('Voting for: ' + str(receivedArguments))
-            writeLogoVote(brandName,
-                          logo['brand_archetypes'][0],
-                          logo['business_categories'][0],
-                          logo['font_families'][0],
-                          logo['font_weights'][1],
-                          logo['text_transforms'][0],
-                          logo['primary_colors'][0],
-                          logo['shapes'][0],
-                          ipAddress,
-                          requestTime)
+            # Check if it has voterPass cookie and if so, it calls writeLogoVote
+            if voterPass:
+                print('Voting for: ' + str(receivedArguments))
+                writeLogoVote(brandName,
+                              receivedArguments['brand_archetypes_id'],
+                              receivedArguments['business_categories_id'],
+                              receivedArguments['font_families_id'],
+                              receivedArguments['font_weights'],
+                              receivedArguments['text_transforms_id'],
+                              receivedArguments['primary_colors_id'],
+                              receivedArguments['shapes_id'],
+                              ipAddress,
+                              requestTime)
+            else:
+                print('No cookie, no voting')
+
         else:
-            print('No cookie, no voting')
+            previousLogo = None
+
+        logos = generateLogos(brandName, brandArchetype, businessCategories, 6, ipAddress, requestTime, previousLogo)
 
         # Close connection
         cnx.close()
         return render_template("logoResults.html", logos=logos), 200
+        # return redirect(logo['vote_url'])
+
+    else:
+        return redirect(url_for("index"))
 
 
 @app.route("/run_ml", methods=["GET"])
