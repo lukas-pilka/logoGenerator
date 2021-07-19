@@ -1,6 +1,5 @@
 import random
 from flask import url_for
-from connector import cloudSqlCnx
 import numpy
 from connector import cloudSqlCnx
 import config
