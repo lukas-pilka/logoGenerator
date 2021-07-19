@@ -199,23 +199,49 @@ def generateLogos(brandName, brandArchetype, businessCategories, countOfLogos, i
     # Selecting best logos (with highest fitness) from all logos
     bestLogos = logos[:countOfLogos]
 
-    # Placement of previous logo into bestLogos
-    # If it receives previous selected logo, it will replace one of the existing logos in bestLogos (depending on previousLogo order)
+
+    # If it receives previous selected logo,
+    # It replace one of the existing logos in bestLogos
+    # It replace some features of other best logos to make them more similar to the previous logo
+
     if previousLogo != None:
-        order = int(previousLogo['order'])
-        bestLogos[order]['brand_name'] = previousLogo['brand_name']
-        bestLogos[order]['brand_archetypes'] = (previousLogo['brand_archetypes_id'], previousLogo['brand_archetypes'])
-        bestLogos[order]['business_categories'] = (previousLogo['business_categories_id'], previousLogo['business_categories'])
-        bestLogos[order]['font_weights'] = (previousLogo['font_weights_id'], previousLogo['font_weights'])
-        bestLogos[order]['font_families'] = (previousLogo['font_families_id'], previousLogo['font_families'])
-        bestLogos[order]['primary_colors'] = (previousLogo['primary_colors_id'], previousLogo['primary_colors'])
-        bestLogos[order]['shapes'] = (previousLogo['shapes_id'], previousLogo['shapes'])
-        bestLogos[order]['text_transforms'] = (previousLogo['text_transforms_id'], previousLogo['text_transforms'])
-        bestLogos[order]['fitness'] = 1.0 # Because user selected this logo
-        bestLogos[order]['previous_logo'] = True  # adds information that it is previousLogo
+
+        prevFontWeights = (previousLogo['font_weights_id'], previousLogo['font_weights'])
+        prevFontFamilies = (previousLogo['font_families_id'], previousLogo['font_families'])
+        prevPrimaryColors = (previousLogo['primary_colors_id'], previousLogo['primary_colors'])
+        prevShapes = (previousLogo['shapes_id'], previousLogo['shapes'])
+        prevTextTransforms = (previousLogo['text_transforms_id'], previousLogo['text_transforms'])
+
+        # Placement of previous logo into bestLogos (depending on previousLogo order)
+        prevLogoOrder = int(previousLogo['order'])
+        bestLogos[prevLogoOrder]['font_weights'] = prevFontWeights
+        bestLogos[prevLogoOrder]['font_families'] = prevFontFamilies
+        bestLogos[prevLogoOrder]['primary_colors'] = prevPrimaryColors
+        bestLogos[prevLogoOrder]['shapes'] = prevShapes
+        bestLogos[prevLogoOrder]['text_transforms'] = prevTextTransforms
+        bestLogos[prevLogoOrder]['fitness'] = 1.0 # Because user selected this logo
+        bestLogos[prevLogoOrder]['previous_logo'] = True  # adds information that it is previousLogo
+
+        # Replacing some features of other best logos to make them more similar to the previous logo
+        for logoOrder in range(len(bestLogos)):
+            for i in range(config.inheritedFeaturesCount):
+                randomFeatureOrder = random.randint(0, 4)
+                print('randomFeatureOrder')
+                print(randomFeatureOrder)
+                if randomFeatureOrder == 0:
+                    bestLogos[logoOrder]['font_weights'] = prevFontWeights
+                if randomFeatureOrder == 1:
+                    bestLogos[logoOrder]['font_families'] = prevFontFamilies
+                if randomFeatureOrder == 2:
+                    bestLogos[logoOrder]['primary_colors'] = prevPrimaryColors
+                if randomFeatureOrder == 3:
+                    bestLogos[logoOrder]['shapes'] = prevShapes
+                if randomFeatureOrder == 4:
+                    bestLogos[logoOrder]['text_transforms'] = prevTextTransforms
+
 
     # Adding vote url
-    order = 0
+    prevLogoOrder = 0
     for logo in bestLogos:
         logo['vote_url'] = url_for('get_logo_results',
                                    brand_name=logo['brand_name'],
@@ -233,9 +259,9 @@ def generateLogos(brandName, brandArchetype, businessCategories, countOfLogos, i
                                    shapes=logo['shapes'][1],
                                    text_transforms_id=logo['text_transforms'][0],
                                    text_transforms=logo['text_transforms'][1],
-                                   order=order, # Order in the list
+                                   order=prevLogoOrder, # Order in the list
                                    )
-        order += 1
+        prevLogoOrder += 1
 
     # Adds best logos views to database
     for logo in bestLogos:

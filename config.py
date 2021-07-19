@@ -1,4 +1,5 @@
-logoStorageSize = 100
+logoStorageSize = 100 # The number of generated logos from which the best ones are selected
+inheritedFeaturesCount = 2 # How many features of generated logos should be overwritten by features of previous logo
 
 brandParamsTbls = ['brand_archetypes', 'business_categories']
 measurableGraphicTbls = ['font_weights']
